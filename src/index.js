@@ -1,14 +1,15 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import reportWebVitals from './reportWebVitals.js';
+import App from './App.js';
+import { SettingsProvider } from './Settings.tsx';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('explain_mplan'));
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <SettingsProvider>
+    <App/>
+  </SettingsProvider>
+    
 );
 
 // If you want to start measuring performance in your app, pass a function
