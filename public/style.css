@@ -2,6 +2,7 @@ body {
     background-color: #FAF9F5;
     margin:0;
     padding: 8px;
+    font-family: Tahoma, sans-serif;
 }
 .links line {
     stroke: #999;
@@ -49,16 +50,26 @@ body {
 .myTable {
     width: 100;
     margin: auto;
+    border-collapse: collapse;
+}
+
+.myTable th, .myTable td {
+    border: 1px solid #ddd;
+    padding: 3px 2px;
+    text-align: left;
 }
 .myTable thead th {
     background-color: darkgray;
 }
 .myTable tr:nth-child(even) {
-    background-color: grey;
+    background-color: #f2f7ff;
 }
 .myTable tr:nth-child(even) {
-    background-color: lightcyan;
+    background-color: white;
 }
+
+
+
 
 textarea {
     overflow-y: scroll;
@@ -163,4 +174,70 @@ svg {
 .myStopScroll > .wb-body {
     overflow:visible !important;
 }
- 
+.nowrap {
+  white-space: nowrap;
+}
+
+.actionCause {
+    margin: 0;
+    width: 100%;
+    font-size: 1.5cqw;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    background-color: red;
+    line-height: 1.1;
+    padding: 10px 0 10px;
+
+}
+.Chosen {
+    background-color: green;
+}
+.ContentBox {
+    margin: 0;
+    padding: 10px;
+    
+}
+
+
+/*
+Source - https://stackoverflow.com/a/64703554
+Posted by Gabriel Castiglioni
+Retrieved 2026-03-04, License - CC BY-SA 4.0
+*/
+
+.chat{
+  display:flex;
+  flex-direction:column;
+  background: #f0f0f0;
+  width: 100%;
+}
+
+.chat_bubble_container{
+  display:flex;
+}
+
+.chat_bubble_container.incoming{
+  justify-content: flex-start;
+  padding-right: 50px;
+}
+
+.chat_bubble_container.outgoing{
+  justify-content: flex-end;
+  padding-left: 50px;
+}
+
+.chat_bubble_container .chat_bubble{
+  padding: 4px;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.chat_bubble_container.incoming .chat_bubble{
+   background: #d1d1d1;
+}
+
+.chat_bubble_container.outgoing .chat_bubble{
+   background: #429bd7;
+  color: white;
+}

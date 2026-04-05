@@ -1,7 +1,7 @@
 import WinBox from 'react-winbox';
 import { StateInfo } from './StateInfo.js';
-import { EdgeInfo } from './EdgeInfo';
-import { ActionInfo } from './ActionInfo';
+import { EdgeInfo } from './EdgeInfo.js';
+import { ActionInfo } from './ActionInfo.tsx';
 
 export default function Inspector(props) {
     const width = 350;
@@ -22,7 +22,7 @@ export default function Inspector(props) {
     }
     if (props.node.data.type==="action") {
         return <WinBox id="InspectorAction" title="Inspector" y="center" x={xPos} min={props.minimised} width={width} height={height}  noClose >
-            <ActionInfo nodeData={props.node} expHandler={props.expHandler} />
+            <ActionInfo nodeData={props.node} expHandler={props.expHandler} setPolicy={props.setPolicy} />
         </WinBox>
     }
 }

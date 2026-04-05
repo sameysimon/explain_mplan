@@ -1,4 +1,5 @@
-import RenderWorth from "../renderQValue";
+import { RoundProb } from "../../common/RenderProbability";
+import RenderWorth from "../../common/RenderWorth";
 
 export function TransitionTable(props) {
     
@@ -13,7 +14,7 @@ export function TransitionTable(props) {
         <tbody>
             {props.transitions.map((v,i) => (
                 <tr key={`tranTab_tr${i}`}>
-                    <th key={`tranTab_tr${i}_prob`}>{v[0]}</th>
+                    <th key={`tranTab_tr${i}_prob`}><RoundProb value={v[0]} /></th>
                     <th key={`tranTab_tr${i}_scr`}>{v[1]}</th>
                     <th key={`tranTab_tr${i}_worth`}>
                         <RenderWorth worth={v.slice(2)}/>

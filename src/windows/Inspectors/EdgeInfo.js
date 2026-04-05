@@ -1,4 +1,4 @@
-import { useSettings } from '../Settings.tsx';
+import { useSettings } from '../../Settings.tsx';
 
 
 export function EdgeInfo(props) {
@@ -20,7 +20,7 @@ export function EdgeInfo(props) {
             {props.edgeData.theories.map((val, i) => (
                 <tr key={i} className="border-t">
                 <td className="border px-4 py-2 font-semibold">{i}</td>
-                <td className="border px-4 py-2">{jsonData.theories[i].Name}</td>
+                <td className="border px-4 py-2">{jsonData.Theories[i].Name}</td>
                 <td className="border px-4 py-2">{String(val)}</td>
                 </tr>
             ))}

@@ -1,17 +1,31 @@
 import { useState } from "react";
 import WinBox from 'react-winbox';
-import { getAction } from './Utility.ts';
+import { getAction } from '../Utility.ts';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
+
+export function RoundProb(props) {
+    let key = "";
+    if (props.key) {
+        key = props.key;
+    }
+    return <span className="worthElement tooltip" key={`${key}_rp_span`}>
+        {Math.round(props.value * 1_000) / 1_000}
+        {!props.noToolTip && 
+            <span className="tooltiptext" key={`${key}_rpTooltipText`}>{props.value}</span>
+        }
+    </span>
+}
+
 
 export default function RenderProb(props) {
     const [ pWind, setPWind ] = useState(false);
     return <>
         <span className="probability" onClick={()=>{setPWind(!pWind)}} style={{color: props?.color ?? "inherit"}}>
-            {props.jsonData.Histories[props.piIdx][props.hIdx]["Probability"]}
+            {props.data.Histories[props.piIdx][props.hIdx]["Probability"]}
         </span>
         {pWind &&
-            <ProbabilityWindow jsonData={props.jsonData} piIdx={props.piIdx} hIdx={props.hIdx} closeHandler={()=>{setPWind(false)}}/>
+            <ProbabilityWindow data={props.data} piIdx={props.piIdx} hIdx={props.hIdx} closeHandler={()=>{setPWind(false)}}/>
         }
         </>
         
@@ -20,12 +34,12 @@ export default function RenderProb(props) {
 function ProbabilityWindow(props) {
 
     let tab = [];
-    let path = props.jsonData.Histories[props.piIdx][props.hIdx]["Path"]
+    let path = props.data.Histories[props.piIdx][props.hIdx]["Path"]
     let c = 1;
     
     for (let i = 0; i < path.length - 1; i++) {
-        let action = getAction(props.piIdx, path[i], props.jsonData);
-        let p = props.jsonData.state_transitions[path[i]][action].find(tr => tr[1]===path[i+1])[0];
+        let action = getAction(props.piIdx, path[i], props.data);
+        let p = props.data.state_transitions[path[i]][action].find(tr => tr[1]===path[i+1])[0];
         c *= p;
         tab.push({
             src: path[i],

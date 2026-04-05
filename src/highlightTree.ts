@@ -39,8 +39,10 @@ export const highlightFn = (hlt, highlights, tree:TreeNode, setTree, setHighligh
     if (hltPos!== -1) {
         // If already in the list...
         if (!setInState && !value && !newHighlights[hltPos].locked) {
+            // remove
             newHighlights[hltPos].value = false;
         } else if (setInState && newHighlights[hltPos].locked) {
+            // unlock and remove highlight
             newHighlights[hltPos].locked = false;
             newHighlights[hltPos].value = false;
         }
@@ -79,7 +81,7 @@ export const highlightFn = (hlt, highlights, tree:TreeNode, setTree, setHighligh
             Object.keys(newActions).forEach(val => {
                 let actionNode = c.node.children.find(child => child.label===val);
                 myStack.push({node:actionNode, hlts:newActions[val], depth:c.depth+1});// Push the action node and the relevant histories/policies
-            })
+            });
         } else if (c.node.type==='action') {
             let newStates = {};
             c.hlts.forEach(hlt => {
@@ -93,7 +95,7 @@ export const highlightFn = (hlt, highlights, tree:TreeNode, setTree, setHighligh
                 } else if (hlt.type==="history") {
                     let currStateIdx = jsonData["Histories"][hlt.piIdx][hlt.hIdx].Path[c.depth];
                     c.node.children.forEach(child => {
-                        if (child.id===currStateIdx) {
+                        if (jsonData["Histories"][hlt.piIdx][hlt.hIdx].Path.includes(child.id)) {
                             if (!Object.keys(newStates).includes(child.id)) { newStates[child.id] = []}
                             if (-1 === newStates[child.id].findIndex(item => item.piIdx===hlt.piIdx&&item.type==="history"&&item.hIdx===hlt.hIdx)) {
                                 newStates[child.id].push(hlt);

@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 import { useState, useEffect, useRef } from "react";
-import GraphSettings from './GraphSettings.js'
 import { useSettings } from "./Settings.tsx";
 import { TreeNode } from "./Utility.ts";
+import FileDetails from "./windows/FileDetails.tsx";
 
 export type CanvasNode = d3.HierarchyPointNode<TreeNode>;
 export type CanvasEdge = d3.HierarchyPointLink<TreeNode>;
@@ -10,6 +10,7 @@ interface CanvasProps {
     tree: TreeNode;
     treeDepth: number;
     nodeClicked: (e: MouseEvent, d: TreeNode) => void;
+    scrColors : { [srcIdx: string] : { [tarIdx: string] : {norm: number, is_pos: boolean} }};
 }
 export default function Canvas(props : CanvasProps) {
     const ref = useRef<SVGSVGElement | null>(null);
@@ -40,16 +41,6 @@ export default function Canvas(props : CanvasProps) {
         return pruned;
     }
 
-    function colourNode(nodeData: TreeNode) {
-        if (nodeData.type==='action') {
-            if (nodeData.policyAction) { return "green" }
-            return "red";
-        } else if (nodeData.type==='state') {
-            if (nodeData.highlight) {
-                return "orange";
-            }
-        }
-    }
 
     // Handles initial graph construction + zoom, scope change etc.
     useEffect(() => {
@@ -80,7 +71,6 @@ export default function Canvas(props : CanvasProps) {
         const height = (window.innerHeight-200);
 
         // Prune the tree to only show:true nodes
-        console.log(props.tree)
         const prunedRoot = pruneTree(props.tree);
         if (!prunedRoot) {
             console.error("No visible nodes found!");
@@ -117,8 +107,12 @@ export default function Canvas(props : CanvasProps) {
         links.enter()
             .append("line")
             .attr("class", "link")
-            .attr("stroke-width", 2)
-            .attr("stroke", "black")
+            .attr('style', function(d) {
+                const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
+                let r = `stroke-width : ${x!=null ? '4px' : '2px'}; `;
+                r += `stroke : ${x != null ? `hsl(${120 * (1-x)}, 80%, 45%)` : "black"}; `;
+                return r;
+            })
             .merge(links)
             .attr("x1", d => d.source.x * spacing[0])
             .attr("y1", d => d.source.y * spacing[1])
@@ -138,7 +132,7 @@ export default function Canvas(props : CanvasProps) {
             .merge(edgeLabels)
             .attr("x", d => ((d.source.x + d.target.x) / 2) * spacing[0])
             .attr("y", d => ((d.source.y + d.target.y) / 2) * spacing[1])
-            .text(d => d.target.data.edgeLabel || ""); // or use your own label logic
+            .text(d => d.target.data.edgeLabel || "");
 
         edgeLabels.exit().remove();
 
@@ -156,12 +150,19 @@ export default function Canvas(props : CanvasProps) {
                 if (d.data.type === 'state') {
                     d3.select(this).append('circle')
                         .attr('r', 10)
-                        .attr('fill', 'steelblue')
+                        .attr('fill', d.data.isGoal ? 'gold' : 'steelblue')
                         .on('click', (e, d) => nodeClicked(e,d));
                 } else if (d.data.type === 'action') {
                     d3.select(this).append('polygon')
                         .attr('points', '-10,10 10,10 0,-10')
-                        .attr('fill', (d) => { return d.data.policyAction ? "green" : "red"; })
+                        .attr('fill', (d) => {
+                            if (d.data.policyAction) {
+                                return "green";
+                            } else if (d.data.counterAction) {
+                                return "magenta"
+                            }
+                            return "red";
+                        })
                         .on('click', (e, d) => nodeClicked(e,d));
                 }
             });
@@ -176,7 +177,7 @@ export default function Canvas(props : CanvasProps) {
     
         nodes.exit().remove(); // Remove extra nodes
 
-    }, [horizon, props.tree, spacing, currentPolicyIdx]);
+    }, [horizon, props.tree, spacing, currentPolicyIdx, props.scrColors]);
 
     useEffect(() => {
         const zoomGroup = d3.select(ref.current).select(".zoomGroup");
@@ -184,8 +185,26 @@ export default function Canvas(props : CanvasProps) {
             zoomGroup.selectAll(".link").attr("stroke", "black");
             return;
         }
-        // Highlight links directly connected to the selected node
+        // Highlight links 
         zoomGroup.selectAll(".link")
+            .attr('style', function(d) {
+                const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
+                let col = "black";
+                let str = "2px";
+                if (d.source.data.highlight && d.target.data.highlight) {
+                    col = "red";
+                    str = "4px";
+                }
+                else if (d.source.data.id === node.data.id || d.target.data.id === node.data.id) {
+                    col = "orange";
+                    str = "5px";
+                } 
+                else if (x!= null) {
+                    col = `hsl(${120 * (1-x)}, 80%, 45%)`;
+                    str = "5px";
+                }
+                return `stroke : ${col}; stroke-width: ${str};`;
+            })
             .attr("stroke", (d) => {
                 if (d.source.data.highlight && d.target.data.highlight) {
                     return "red";
@@ -193,12 +212,24 @@ export default function Canvas(props : CanvasProps) {
                 if (d.source.data.id === node.data.id || d.target.data.id === node.data.id) {
                     return "orange";
                 }
+                const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
+                if (x != null) {
+                    return `hsl(${120 * (1-x)}, 80%, 45%)`;
+                }
+
                 return "black";
             });
     });
 
     return <>
         <svg id="canvas" className="canvas" width="100%" height="100%" ref={ref}></svg>
-        <GraphSettings spacing={spacing} setSpacing={setSpacing} horizon={horizon} setHorizon={setHorizon} maxHorizon={props.treeDepth}/>
+        <FileDetails 
+            spacing={spacing}
+            setSpacing={setSpacing}
+            horizon={horizon}
+            setHorizon={setHorizon}
+            maxHorizon={props.treeDepth}
+        />
+        
     </>
 }
