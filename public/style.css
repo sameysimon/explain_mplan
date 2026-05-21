@@ -112,7 +112,7 @@ details summary {
     display: inline;
 }
 .highlighted {
-    background-color:aqua;
+    background-color:#C27AFF;
 }
 
 .argument {
@@ -240,4 +240,9 @@ Retrieved 2026-03-04, License - CC BY-SA 4.0
 .chat_bubble_container.outgoing .chat_bubble{
    background: #429bd7;
   color: white;
+}
+.TitanicTable {
+    width: 60%;
+    text-align: center;
+    transform: translateX(-10px);
 }

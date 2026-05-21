@@ -7,7 +7,7 @@ export function TransitionTable(props) {
         <thead>
             <tr>
                 <th>Probability</th>
-                <th>SuccessorID</th>
+                <th>Successor</th>
                 <th>Worth</th>
             </tr>
         </thead>

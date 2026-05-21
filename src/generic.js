@@ -14,6 +14,7 @@ export async function Query(endpoint, port, request, handleResp, handleStart=nul
             throw new Error(`Server error: ${response.status}`);
         }
         const data = await response.json();
+        console.log(`Endpoint ${endpoint} response`, data);
         handleResp(data);
     } catch (err) {
         alert(`Query to endpoint ${endpoint} failed: ${err.message}`);

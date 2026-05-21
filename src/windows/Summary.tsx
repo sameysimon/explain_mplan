@@ -8,7 +8,7 @@ import RenderHistory from '../common/RenderHistory.tsx';
 import PolicyHistories from './ShowHistories.tsx';
 import { RoundProb } from '../common/RenderProbability.js';
 
-export default function Summary(props) {
+export default function Summary(props:{width:number, height:number, setPolicy:(a:number)=>void}) {
     const { jsonData, setJsonData, userType } = useSettings();
     const [ showHistories, setShowHistories ] = useState(-1);
 
@@ -42,7 +42,7 @@ export default function Summary(props) {
             {jsonData.Non_Moral !== -1 ?
                 `
                 The moral theories are informed by ${jsonData.Considerations.length - 1} moral considerations.
-                There is also a non-moral consideration with ${jsonData.Goals.length} goal states and a budget of ${jsonData.Considerations[jsonData.Non_Moral].Budget}.`
+                There is also a non-moral consideration with ${jsonData.Goals?.length ?? 0} goal states and a budget of ${jsonData.Considerations[jsonData.Non_Moral].Budget}.`
                 :
                 `The moral theories are informed by ${jsonData.Considerations.length} moral considerations.`
             }
@@ -51,7 +51,6 @@ export default function Summary(props) {
         <thead>
             <tr>
                 <th>Moral Theory</th>
-                <th>Theory Type</th>
                 <th>Rank</th>
                 <th>Moral Consideration</th>
                 <th>Consideration Type</th>
@@ -70,7 +69,6 @@ export default function Summary(props) {
                         {conIdx === 0 && (
                             <>
                                 <td rowSpan={rowCount}>{String(mt.Name)}</td>
-                                <td rowSpan={rowCount}>{mt.Type}</td>
                                 <td rowSpan={rowCount}>{mt.Rank}</td>
                             </>
                         )}

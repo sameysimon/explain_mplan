@@ -34,7 +34,7 @@ export function StateInfo(props) {
     }
     }
 
-    let r = <h3>State '{props.nodeData.data.id.toString()}'</h3>
+    let r = <h3>State {props.nodeData.data.id.toString()}</h3>
     if (jsonData.Domain==="SearchRescue" && isTags) {
         
         r = <>{r}
@@ -46,16 +46,16 @@ export function StateInfo(props) {
         let xRange = [...Array(5).keys().map(v => v - 2)];
         let yRange = [...Array(6).keys().map(v => v - 4)].reverse();
         r = <>{r}
-            <p>Grid representation of titanic problem. Black squares represent front (F) and back (B) of titanic.
-                Red squares show location in previous state. 
-                White squares (I) shows location of iceberg.
-                White square with asterisk (*) is where Titanic hit the iceberg.</p>
+            <p>Grid representation of titanic problem. Grey squares represent front (F) and back (B) of titanic.
+                Red squares show the Titanic's location in the previous state. 
+                White squares (I) show location of iceberg.
+                White squares with an asterisk (*) show where the Titanic has hit the iceberg.</p>
             <ul>
                 <li>Time={info['time']}</li>
                 <li>Titanic bow (front) ({info['x-front']}, {info['y-front']})</li>
                 <li>Titanic stern (back) ({info['x-back']}, {info['y-back']})</li>
             </ul>
-            <table >
+            <table className="TitanicTable">
                 <tbody>
                     <tr>
                         <td key={`state_origin`}>y\x</td>
@@ -110,7 +110,7 @@ export function StateInfo(props) {
         </>
     }
 
-    return <>{r}
+    return <div className="ContentBox">{r}
         {isTags &&
             <table>
             <thead>
@@ -139,5 +139,5 @@ export function StateInfo(props) {
         </table>
     }
     {!isTags && <p>There are no state tags.</p>}
-    </>
+    </div>
 };

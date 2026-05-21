@@ -7,6 +7,8 @@ type RenderWorthProps = {
     considerations?:string|string[];
     colorMap?:{ [key:string]: string };
     noToolTip?:boolean;
+    combine?:(a:any, b:any)=>any;
+    combineDefault?:any;
 }
 
 export default function RenderWorth(props : RenderWorthProps) {
@@ -52,6 +54,18 @@ export default function RenderWorth(props : RenderWorthProps) {
         return r;
     }
     
+    if (props.combine!==undefined && props.combineDefault!==undefined) {
+        let combo = props!.combineDefault;
+        myConsiderations.forEach((v) => {
+            combo = props.combine!(qValue[v], combo);
+        });
+        return <span className="nowrap">
+            {"("}
+            {combo}
+            {")"}
+            </span>;
+    }
+
     return <span className="nowrap">
         {"("}
         {myConsiderations.map((v, i) => (<>

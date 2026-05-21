@@ -12,6 +12,16 @@ interface CanvasProps {
     nodeClicked: (e: MouseEvent, d: TreeNode) => void;
     scrColors : { [srcIdx: string] : { [tarIdx: string] : {norm: number, is_pos: boolean} }};
 }
+
+const SetEdgeLabels = (d: { target: { data: { edgeLabel: any; }; }; }) => {
+    return d.target.data.edgeLabel || "";
+};
+
+
+
+
+
+
 export default function Canvas(props : CanvasProps) {
     const ref = useRef<SVGSVGElement | null>(null);
     const [spacing, setSpacing] = useState<[number,number]>([1,1]);
@@ -60,7 +70,7 @@ export default function Canvas(props : CanvasProps) {
             // Setup zoom behavior on the SVG
             const zoom = d3.zoom()
                 .scaleExtent([0.5, 3])
-                .on("zoom", (e) => {
+                .on("zoom", (e: { transform: any; }) => {
                     zoomGroup.attr("transform", e.transform);
                 });
 
@@ -95,67 +105,85 @@ export default function Canvas(props : CanvasProps) {
         const treeData = treeLayout(root);
 
         // Filter out nodes that are not in horizon
-        const inHorizonNodes = treeData.descendants().filter(d => d.depth <= horizon);
-        const inHorizonLinks = treeData.links().filter(l => l.target.depth <= horizon);
+        const inHorizonNodes = treeData.descendants().filter((d: { depth: number; }) => d.depth <= horizon);
+        const inHorizonLinks = treeData.links().filter((l: { target: { depth: number; }; }) => l.target.depth <= horizon);
 
         const zoomGroup = d3.select(ref.current).select(".zoomGroup");
         
         // --- Render Links ---
         const links = zoomGroup.selectAll('.link')
-            .data(inHorizonLinks, d=> d.target.id);
+            .data(inHorizonLinks, (d: { target: { id: any; }; })=> d.target.id);
 
         links.enter()
             .append("line")
             .attr("class", "link")
-            .attr('style', function(d) {
+            .attr('style', function(d: { source: { data: { source_state: string | number; }; }; target: { data: { id: string | number; }; }; }) {
                 const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
                 let r = `stroke-width : ${x!=null ? '4px' : '2px'}; `;
                 r += `stroke : ${x != null ? `hsl(${120 * (1-x)}, 80%, 45%)` : "black"}; `;
                 return r;
             })
             .merge(links)
-            .attr("x1", d => d.source.x * spacing[0])
-            .attr("y1", d => d.source.y * spacing[1])
-            .attr("x2", d => d.target.x * spacing[0])
-            .attr("y2", d => d.target.y * spacing[1])
-            .on('click', (e,d) => edgeClicked(e,d));
+            .attr("x1", (d: { source: { x: number; }; }) => d.source.x * spacing[0])
+            .attr("y1", (d: { source: { y: number; }; }) => d.source.y * spacing[1])
+            .attr("x2", (d: { target: { x: number; }; }) => d.target.x * spacing[0])
+            .attr("y2", (d: { target: { y: number; }; }) => d.target.y * spacing[1])
+            .on('click', (e: MouseEvent,d: any) => edgeClicked(e,d));
         links.exit().remove();
     
         const edgeLabels = zoomGroup.selectAll('.edge-label')
-            .data(inHorizonLinks, d => d.target.id);
+            .data(inHorizonLinks, (d: { target: { id: any; }; }) => d.target.id);
 
         edgeLabels.enter()
             .append("text")
             .attr("class", "edge-label")
             .attr("text-anchor", "middle")
             .attr("dy", -5) // adjust as needed
+            .attr("font-weight", "bold")
+            .attr("font-size", "15px")
+            .attr("stroke", "black")
+            .attr("stroke-width", "3px")
+            .attr("stroke-linejoin", "round")
+            .attr("paint-order", "stroke")
             .merge(edgeLabels)
-            .attr("x", d => ((d.source.x + d.target.x) / 2) * spacing[0])
-            .attr("y", d => ((d.source.y + d.target.y) / 2) * spacing[1])
-            .text(d => d.target.data.edgeLabel || "");
+            .attr("fill", "white")
+            .attr("x", (d: { source: { x: any; }; target: { x: any; }; }) => ((d.source.x + d.target.x) / 2) * spacing[0])
+            .attr("y", (d: { source: { y: any; }; target: { y: any; }; }) => ((d.source.y + d.target.y) / 2) * spacing[1])
+            .text(SetEdgeLabels);
 
-        edgeLabels.exit().remove();
-
+        edgeLabels.exit()
+            .remove();
 
 
         const nodes = zoomGroup.selectAll(".node")
-            .data(inHorizonNodes, d => d.id);
+            .data(inHorizonNodes, (d: { id: any; }) => d.id);
         
         const nodeEnter = nodes.enter()
             .append("g")
             .attr("class", "node")
-            .attr("transform", d => `translate(${d.x * spacing[0]},${d.y * spacing[1]})`);
+            .attr("transform", (d: { x: number; y: number; }) => `translate(${d.x * spacing[0]},${d.y * spacing[1]})`);
 
-        nodeEnter.each(function (d) {
+        nodeEnter.each(function (d: { data: { type: string; isGoal: any; }; }) {
                 if (d.data.type === 'state') {
                     d3.select(this).append('circle')
-                        .attr('r', 10)
+                        .attr('r', 15)
                         .attr('fill', d.data.isGoal ? 'gold' : 'steelblue')
-                        .on('click', (e, d) => nodeClicked(e,d));
+                        .on('click', (e: MouseEvent, d: any) => nodeClicked(e,d));
+                    d3.select(this).append('text')
+                        .attr('text-anchor', 'middle')
+                        .attr('dominant-baseline', 'middle')
+                        .attr('pointer-events', 'none')
+                        .attr("font-size", "15px")
+                        .attr("fill", "white")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", "2px")
+                        .attr("stroke-linejoin", "round")
+                        .attr("paint-order", "stroke")
+                        .text((d: { data: { label: any; }; }) => d.data.label);
                 } else if (d.data.type === 'action') {
                     d3.select(this).append('polygon')
-                        .attr('points', '-10,10 10,10 0,-10')
-                        .attr('fill', (d) => {
+                        .attr('points', '-15,15 15,15 0,-15')
+                        .attr('fill', (d: { data: { id: any, policyAction: any; counterAction: any; }; }) => {
                             if (d.data.policyAction) {
                                 return "green";
                             } else if (d.data.counterAction) {
@@ -163,19 +191,29 @@ export default function Canvas(props : CanvasProps) {
                             }
                             return "red";
                         })
-                        .on('click', (e, d) => nodeClicked(e,d));
+                        .on('click', (e: MouseEvent, d: any) => nodeClicked(e,d));
+                        d3.select(this).append('text')
+                            .attr('text-anchor', 'middle')
+                            .attr('dominant-baseline', 'middle')
+                            .attr('pointer-events', 'none')
+                            .attr("font-size", "15px")
+                            .attr("fill", "white")
+                            .attr("stroke", "black")
+                            .attr("stroke-width", "3px")
+                            .attr("stroke-linejoin", "round")
+                            .attr("paint-order", "stroke")
+                            .text((d: { data: { label: any; }; }) => d.data.label);
                 }
             });
 
-        nodeEnter.append('text')
-            .attr('dx', 12)
-            .attr('dy', '.35em')
-            .text(d => d.data.label);
-    
+
         nodes.merge(nodeEnter)
-            .attr("transform", d => `translate(${d.x * spacing[0]},${d.y * spacing[1]})`);
+            .attr("transform", (d: { x: number; y: number; }) => `translate(${d.x * spacing[0]},${d.y * spacing[1]})`);
     
         nodes.exit().remove(); // Remove extra nodes
+
+        // Bring nodes group to the front so they appear above edges
+        zoomGroup.selectAll(".node").raise();
 
     }, [horizon, props.tree, spacing, currentPolicyIdx, props.scrColors]);
 
@@ -187,37 +225,24 @@ export default function Canvas(props : CanvasProps) {
         }
         // Highlight links 
         zoomGroup.selectAll(".link")
-            .attr('style', function(d) {
+            .attr('style', function(d: { source: { data: { source_state: string | number; highlight: any; id: any; }; }; target: { data: { id: string | number; highlight: any; }; }; }) {
                 const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
                 let col = "black";
                 let str = "2px";
                 if (d.source.data.highlight && d.target.data.highlight) {
-                    col = "red";
+                    col = "#C27AFF";
                     str = "4px";
                 }
-                else if (d.source.data.id === node.data.id || d.target.data.id === node.data.id) {
-                    col = "orange";
-                    str = "5px";
-                } 
                 else if (x!= null) {
                     col = `hsl(${120 * (1-x)}, 80%, 45%)`;
                     str = "5px";
                 }
+                else if (d.source.data.id === node.data.id || d.target.data.id === node.data.id) {
+                    col = "cyan";
+                    str = "5px";
+                } 
+                
                 return `stroke : ${col}; stroke-width: ${str};`;
-            })
-            .attr("stroke", (d) => {
-                if (d.source.data.highlight && d.target.data.highlight) {
-                    return "red";
-                }
-                if (d.source.data.id === node.data.id || d.target.data.id === node.data.id) {
-                    return "orange";
-                }
-                const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
-                if (x != null) {
-                    return `hsl(${120 * (1-x)}, 80%, 45%)`;
-                }
-
-                return "black";
             });
     });
 

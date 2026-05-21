@@ -1,4 +1,25 @@
+import { RoundProb } from "./common/RenderProbability";
 import type { JsonData, Solution } from "./Settings";
+
+
+export const variance = (nums:number[]) => {
+    const mean = nums.reduce((sum, val) => sum + val, 0) / nums.length;
+    const squaredDiffSum = nums.reduce((acc, val) => {
+        return acc + Math.pow(val - mean, 2);
+    }, 0);
+        return nums.length > 0 ? squaredDiffSum / nums.length : 0;
+}
+export const argmin = (nums:number[]) => {
+    let minIndex = 0;
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] < nums[minIndex]) {
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
+
+
 
 // Recursively set show for descendants of a node by id
 export const setShowRecursive = (node, targetId, value) => {
@@ -17,7 +38,7 @@ export const setShowRecursive = (node, targetId, value) => {
 };
 
 export const getConsiderations = (theory:string, data:JsonData) => {
-    let considers = [];
+    let considers:string[] = [];
     data.Considerations.forEach((co) => {
         if (co.Component_of === theory || co.Component_of.includes(theory)) {
             considers.push(co.Name);
@@ -78,7 +99,7 @@ export interface TreeNode {
 }
 
 export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[]) => {
-    var tree:TreeNode = {id: 0, type:'state', isGoal:false, show: true, info: json.State_tags ? json.State_tags[0] : "", selected: false, children: [], source_state: 0};
+    var tree:TreeNode = {id: 0, type:'state', isGoal:false, show: true, info: json.State_tags ? json.State_tags[0] : "", selected: false, children: [], source_state: 0, label: "0"};
     if (!counter_policies) {
         counter_policies = [];
     }
@@ -117,7 +138,7 @@ export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:
                 type: 'state',
                 isGoal: json.Goals ? json.Goals.includes(scr[1]) : false,
                 label: scr[1],
-                edgeLabel:scr[0],
+                edgeLabel: Math.round(scr[0] * 1_000) / 1_000,
                 info : json.State_tags ? json.State_tags[scr[1]] : "",
                 show: showState,
                 selected: false,

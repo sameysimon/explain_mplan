@@ -5,11 +5,12 @@ import { CriticalQuestions } from './Inspectors/ExplainAttack/CriticalQuestions'
 import { useSettings } from '../Settings';
 import RenderPolicy from '../common/RenderPolicy';
 import { RoundProb } from '../common/RenderProbability';
+import { InlineMath } from 'react-katex';
 
 
 export default function ExplainMEHR(props) {
     const { jsonData, setJsonData } = useSettings();
-    const { highlightFn, highlights, setHighlights } = useSettings();
+    const { highlightFn, highlights, setHighlights, userType } = useSettings();
     const { currentPolicyIdx, setCurrentPolicyIdx } = useSettings();
     const [ cqWindow, setCqWindow ] = useState(false); 
     const [ firstFoilIdx, setFirstFoilIdx ] = useState(0); 
@@ -70,9 +71,15 @@ export default function ExplainMEHR(props) {
             onClose={()=>{setCqWindow(false)}}
             >
             <div className='ContentBox'>
-            <h3>Why not action {actionLabel} on state s_{stateID} rather than policy <RenderPolicy id={pIdx} noClick={true} />?</h3>
-
-            <p>There are {foils.length} in-budget and Pareto undominated policies that chose action '{actionLabel}' on state s_{stateID} with a minimal non-acceptability of <RoundProb value={jsonData.Solutions[foils[0]].Acceptability} /></p>
+            <h3>Why not action '{actionLabel}' rather than policy <RenderPolicy id={pIdx} noClick={true} />?</h3>
+            {userType==="User" ? 
+                <p>
+                    Action '{actionLabel}' was not selected because arguments its hypothetical outcomes are defeated with greater probability.
+                    There {foils.length===1 ? "is" : "are"} {foils.length} potentially acceptable {foils.length===1 ? "policy" : "policies"} that select action '{actionLabel}'.
+                </p> :
+                <p>There {foils.length===1 ? "is" : "are"} {foils.length} proper Pareto Front {foils.length===1 ? "policy" : "policies"} that chose action '{actionLabel}' on state s_{stateID} with a minimal non-acceptability of <RoundProb value={jsonData.Solutions[foils[0]].Acceptability} /></p>
+            }
+            
             
             {foils.slice(firstFoilIdx, firstFoilIdx+foilPageSize).map((piIdx, i) => {
                 return <>
@@ -89,10 +96,16 @@ export default function ExplainMEHR(props) {
                     }
                     </h4>
                     <AttackTable jsonData={jsonData} piIdx={piIdx} getHistoryProp={getHistoryProp} getHistoryHandlers={getHistoryHandlers} setCqWindow={setCqWindow} />
+
                 </>
             })}
             <h4>The Fact Policy <RenderPolicy id={pIdx} noClick={true}/> worth <RenderWorth worth={getSolutionProp(pIdx, "Expectation")} jsonData={jsonData} /></h4>
-            <AttackTable jsonData={jsonData} piIdx={pIdx} getHistoryProp={getHistoryProp} getHistoryHandlers={getHistoryHandlers} setCqWindow={setCqWindow} />
+            {jsonData.Attacks[pIdx].length === 0 ?
+                <p>The fact policy is not attacked.</p>
+                :
+                <AttackTable jsonData={jsonData} piIdx={pIdx} getHistoryProp={getHistoryProp} getHistoryHandlers={getHistoryHandlers} setCqWindow={setCqWindow} />
+            }
+            
             </div>
             </WinBox>
             </>
@@ -119,15 +132,15 @@ export default function ExplainMEHR(props) {
 
 function AttackTable(props) {
     const { jsonData, piIdx, getHistoryHandlers, getHistoryProp } = props;
-
-    return (
+    let nacc_table = {};
+    return (<>
         <table className="myTable" key={"table_" + piIdx}>
             <thead>
                 <tr className="border-t">
                     <th>Source Policy</th>
-                    <th>Source History</th>
+                    <th>Source Trajectory</th>
                     <th style={{ width: '40px' }}></th> {/* Column for the Arrow */}
-                    <th>Target History</th>
+                    <th>Target Trajectory</th>
                     <th>Probability</th>
                     <th>Theory</th>
                     <th></th>
@@ -138,8 +151,14 @@ function AttackTable(props) {
                     const policyRowSpan = attacksArray.length;
 
                     return attacksArray.map((att, attIdx) => {
-                        const theoryName = jsonData.Theories[att.thy].Name;
                         
+                        // Update table summing for non-acceptability
+                        const theoryName = jsonData.Theories[att.thy].Name;
+                        if (!nacc_table.hasOwnProperty(theoryName)) {
+                            nacc_table[theoryName] = 0;
+                        }
+                        nacc_table[theoryName] += getHistoryProp(piIdx, att.tar, "Probability");
+
                         // Logic for Theory Merging
                         const isFirstTheoryOccurrence = attIdx === 0 || jsonData.Theories[attacksArray[attIdx - 1].thy].Name !== theoryName;
                         let theoryRowSpan = 1;
@@ -172,7 +191,7 @@ function AttackTable(props) {
                         });
 
                         const rowBg = groupIdx % 2 === 0 ? "#ffffff" : "#f9f9f9";
-
+                        
                         return (
                             <tr key={`tr_${piIdx}_${srcPolicy}_${attIdx}`} style={{ backgroundColor: rowBg }}>
                                 {attIdx === 0 && (
@@ -183,7 +202,7 @@ function AttackTable(props) {
 
                                 {isFirstSrcOccurrence && (
                                     <td rowSpan={srcRowSpan} {...getHistoryHandlers(srcPolicy, att.src)} style={{ verticalAlign: 'middle' }}>
-                                        h_{att.src} <RenderWorth worth={getHistoryProp(srcPolicy, att.src, "Worth")} jsonData={jsonData} colorMap={myGreenConsiders} />
+                                        <InlineMath math={`\\tau_${att.src}`}/> <RenderWorth worth={getHistoryProp(srcPolicy, att.src, "Worth")} jsonData={jsonData} colorMap={myGreenConsiders} />
                                     </td>
                                 )}
 
@@ -194,7 +213,7 @@ function AttackTable(props) {
                                 )}
 
                                 <td {...getHistoryHandlers(piIdx, att.tar)}>
-                                    h_{att.tar} <RenderWorth worth={getHistoryProp(piIdx, att.tar, "Worth")} jsonData={jsonData} colorMap={myRedConsiders} />
+                                    <InlineMath math={`\\tau_${att.tar}`}/> <RenderWorth worth={getHistoryProp(piIdx, att.tar, "Worth")} jsonData={jsonData} colorMap={myRedConsiders} />
                                 </td>
 
                                 <td>
@@ -224,5 +243,28 @@ function AttackTable(props) {
                 })}
             </tbody>
         </table>
+        <br/>
+        <table className="myTable" key={"nacc_table_" + piIdx}>
+            <thead>
+                <tr className="border-t">
+                    <th>Theory</th>
+                    <th>Non-Acceptability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {Object.entries(nacc_table).map((val) => (
+                    <tr>
+                        <td key={`nacc_table_${piIdx}_${val[0]}`}>{val[0]}</td>
+                        <td key={`nacc_table_${piIdx}_${val[0]}_val`}>{val[1]}</td>
+                    </tr>
+                ))}
+                <tr>
+                    <td key={`nacc_table_${piIdx}_total`}>Total</td>
+                    <td key={`nacc_table_${piIdx}_total_val`}>{Object.values(nacc_table).reduce((a,v)=>a+v, 0)}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </>
     );
 }

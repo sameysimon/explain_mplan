@@ -45,16 +45,16 @@ export function ActionInfo(props: ActionInfoProps) {
     
     // Is the source state in this policy (or any policy)
     const polsWithState:number[] = findPolicyWithState(props.nodeData.data.source_state, jsonData);
-    const unDomPolsWithState = polsWithState.filter((piIdx)=>piIdx<jsonData.SolutionTotal);
+    const unDomPolsWithState:number[] = polsWithState.filter((piIdx)=>piIdx<jsonData.SolutionTotal);
 
     // The indices of policies with this action.
     const polsWithAction = findPolicyWithStateAction(props.nodeData.data.label, props.nodeData.data.source_state, jsonData);
     const unDomPolsWithAction = polsWithAction.filter((piIdx)=>piIdx<jsonData.SolutionTotal);  
     
     // Query for QValues
-    const [allActionsQValues, setActionsQValues] = useState<{[key:string]: ActionsQValuesType}>(null);
-    const [necessaryPolicies, setNecessaryPolicies] = useState<number[]>([]);
-    const [cause, setCause] = useState<string>(null);
+    const [allActionsQValues, setActionsQValues] = useState<{[key:string]: ActionsQValuesType}|null>(null);
+    const [necessaryPolicies, setNecessaryPolicies] = useState<number[]|null>([]);
+    const [cause, setCause] = useState<string|null>(null);
 
     let expWorthPhrase = userType==="User" ? "expected worth" : "Q-value";
     
@@ -68,7 +68,7 @@ export function ActionInfo(props: ActionInfoProps) {
             setCause(c);
             return;
         }
-        if (polsWithState.length === 0) {
+        if (!polsWithState.includes(currentPolicyIdx)) {
             setCause("Ancestor");
             return;
         }
@@ -90,7 +90,7 @@ export function ActionInfo(props: ActionInfoProps) {
                 'action_label': props.nodeData.data.label,
                 'factPolicyIdx': currentPolicyIdx
             },
-            (d)=>{
+            (d:any)=>{
                 let j = {...jsonData};
                 if (!j.Action_cause[String(props.nodeData.data.source_state)]) {
                     j.Action_cause[String(props.nodeData.data.source_state)] = {};
@@ -109,7 +109,7 @@ export function ActionInfo(props: ActionInfoProps) {
     //
     const queryQValues = async () => {
         Query("QValues", port, {state_id: props.nodeData.data.source_state}, 
-            (d)=>{setActionsQValues(d);}
+            (d:any)=>{setActionsQValues(d);}
         );
     };
     const queryMEHR = async () => {
@@ -119,7 +119,7 @@ export function ActionInfo(props: ActionInfoProps) {
                 actionLabel: props.nodeData.data.label,
                 factPolicyIdx: currentPolicyIdx
             }, 
-            (d)=>{
+            (d:any)=>{
                 props.expHandler(d, currentPolicyIdx, props.nodeData.data.source_state, props.nodeData.data.label)
             }
         );
@@ -144,7 +144,7 @@ export function ActionInfo(props: ActionInfoProps) {
                 actionLabel: props.nodeData.data.label,
                 factPolicyIdx: currentPolicyIdx
             },
-            (d)=> {
+            (d:any)=> {
                 let newJSON = JSON.parse(JSON.stringify(jsonData));
                 let neccPolsInd_ = [];
                 for (let key in d.FoilSolutions) { 
@@ -176,7 +176,7 @@ export function ActionInfo(props: ActionInfoProps) {
     // Causal category    
     // Main information + transitions
     let body = <>
-        <h2>Action '{props.nodeData.data.label}' on State s_{props.nodeData.data.source_state}</h2>
+        <h2>Action '{props.nodeData.data.label}' on State {props.nodeData.data.source_state}</h2>
         <h3>Action outcomes</h3>
         <TransitionTable transitions={jsonData.State_transitions[props.nodeData.data.source_state][props.nodeData.data.label]}/>
         <h3>Use in policies:</h3>
@@ -187,54 +187,61 @@ export function ActionInfo(props: ActionInfoProps) {
             </p>
             :
             <p>
-                The parent state s_{props.nodeData.data.source_state} is used by {polsWithState.length} policies: 
+                The parent state s_{props.nodeData.data.source_state} is included in {polsWithState.length} policies: 
                 ({listPolicies(polsWithState)}).
             </p>
         }
         {polsWithAction.length+polsWithState.length>0 &&
             <>
-            { props.nodeData.data.policyAction==true ?
-                <p>Action is selected by current policy <RenderPolicy id={currentPolicyIdx}/>.</p> :
-                <p>The current policy <RenderPolicy id={currentPolicyIdx}/> selects '{bestAction}', not this action.</p>
+            { props.nodeData.data.policyAction==true &&
+                <p>Action is selected by current policy <RenderPolicy id={currentPolicyIdx}/>.</p>
+            }
+            { props.nodeData.data.policyAction==true && bestAction!=='[no stateIdx]' &&
+                    <p>The current policy <RenderPolicy id={currentPolicyIdx}/> selects '{bestAction}', not this action.</p>
             }
             </>
         }
-        {props.nodeData.data.policyAction==false &&
-            <button onClick={queryQValues} disabled={!!allActionsQValues}>
-                Why action <RenderPolicy id={currentPolicyIdx} noClick={true}/>
-                (s_{props.nodeData.data.source_state})={bestAction} rather than action '{props.nodeData.data.label}'?
+        
+        { userType !== "User" &&
+            <button onClick={queryQValues} disabled={allActionsQValues!==null}>
+                What is the moral worth of this action?
             </button>
         }
-        {allActionsQValues && <>
+        {allActionsQValues && cause!==null && 
             <QValueTable 
                 expWorthPhrase={expWorthPhrase}
-                allActionsQValues={allActionsQValues}
                 nodeData={props.nodeData}
-                causeCategory={cause} />
-
-            {cause && (cause.includes('Non-moral') || cause.includes('Pareto')) &&
-                <button onClick={planLocked}>
-                    { (cause==='Pareto Dominance') &&
-                        `Why is action '${props.nodeData.data.label}' Pareto dominated?`
-                    }
-                    { cause=== 'Non-moral' &&
-                        `Why is action '${props.nodeData.data.label}' over budget?`
-                    }
-                    { cause==='Pareto Dominance and Non-moral' &&
-                        `Why is action '${props.nodeData.data.label}' Pareto dominated and over budget?`
-                    }
-                </button>
-            }
-
-            {cause && cause.includes('MEHR') &&
-                <button onClick={queryMEHR}>
-                    Why is action '{props.nodeData.data.label}' preferred by MEHR?
-                </button>
-            }
-        </>
+                allActionsQValues={allActionsQValues}
+                causeCategory={cause} 
+            />        
         }
+
+        {cause && (cause.includes('Non-moral') || cause.includes('Pareto')) &&
+            <button disabled={necessaryPolicies!==null} onClick={planLocked}>
+                { (cause==='Pareto Dominance') &&
+                    `Why is action '${props.nodeData.data.label}' Pareto dominated?`
+                }
+                { cause=== 'Non-moral' &&
+                    `Why is action '${props.nodeData.data.label}' over budget?`
+                }
+                { cause==='Pareto Dominance and Non-moral' &&
+                    `Why is action '${props.nodeData.data.label}' Pareto dominated and over budget?`
+                }
+            </button>
+        }
+
+        {cause && cause.includes('MEHR') &&
+            <button onClick={queryMEHR}>
+                Why is action '{props.nodeData.data.label}' preferred by MEHR?
+            </button>
+        }
+        
         {necessaryPolicies && <>
-            <p>Planning with this action '{props.nodeData.data.label}' finds {necessaryPolicies.length} counter-factual policies:</p>
+            <p>Planning with this '{props.nodeData.data.label}' found {necessaryPolicies.length} minimally counter-factual policies:</p>
+            <p>Either select one or right click to it as a counter policy.</p>
+            <p>
+                The current policy <RenderPolicy id={currentPolicyIdx} /> expects moral worth <RenderWorth worth={jsonData.Solutions[currentPolicyIdx].Expectation} />
+            </p>
             <table className="myTable">
             <thead><tr>
                 <th>Policy</th>
@@ -244,23 +251,27 @@ export function ActionInfo(props: ActionInfoProps) {
                 }
                 <th>Visualise</th>
             </tr></thead>
-            <tbody>{necessaryPolicies.map((pi_idx, i) => (<tr>
+            <tbody>{necessaryPolicies.map((pi_idx, i) => {
+                    const budget = jsonData.Non_Moral!==-1 ? jsonData.Considerations[jsonData.Non_Moral].Budget : undefined;
+                    return <tr>
                     <td key={`necc_pols_pi_${i}`}> <RenderPolicy id={pi_idx} key={`necc_pols_rpi_${i}`} /> </td>
                     <td key={`necc_pols_w_${i}`}> <RenderWorth worth={jsonData.Solutions[pi_idx].Expectation} key={`necc_pols_rw_${i}`} /> </td>
-                    {jsonData.Non_Moral!==-1 &&
+                    {budget &&
                        <td key={`necc_pols_b_${i}`}>
-                        {parseFloat(jsonData.Solutions[pi_idx].Expectation[jsonData.Non_Moral]) < (jsonData.Considerations[jsonData.Non_Moral].Budget*-1)
+                        {parseFloat(jsonData.Solutions[pi_idx].Expectation[jsonData.Non_Moral]) < (budget*-1)
                                 ? "true" : "false"}
                        </td>
                     }
                     <td key={`necc_pols_sh_${i}`}> <button onClick={() => {props.setPolicy(pi_idx);}} key={`necc_pols_sh_${i}`}>Show</button> </td>
-            </tr>))}</tbody>
+                    </tr>;
+                })}
+            </tbody>
             </table>
             </>
         }
     </>;
 
-    const causeToColour = (c) => {
+    const causeToColour = (c:string|null) => {
         switch (c) {
             case 'False by MEHR':
             case 'User preference':
@@ -278,7 +289,8 @@ export function ActionInfo(props: ActionInfoProps) {
     return  <>
         <div className={"actionCause"} style={{backgroundColor: `${causeToColour(cause)}`}}>
             { cause==='Ancestor' && "Not Chosen By Ancestor" }
-            { cause==='Equivalent' && "Equivalent to Current Policy" }
+            { cause==='Equivalent to fact' && "Equivalent to Current Policy" }
+            { cause==='Equivalent to other' && "Equivalent to Other Policy" }
             { cause==='User preference' && "Not Chosen by User Preference" }
             { cause==='False by MEHR' && "Is preferred by MEHR" }
             { cause==='MEHR Preference' && "Not Chosen By MEHR Preference" }
@@ -296,13 +308,14 @@ export function ActionInfo(props: ActionInfoProps) {
     
 }
 
-interface ActionInfoProps {
+interface QValueTableProps {
     expWorthPhrase: string;
     nodeData: CanvasNode;
     allActionsQValues: {[key:string]: ActionsQValuesType};
     causeCategory: string;
 }
-function QValueTable(props) {
+
+function QValueTable(props:QValueTableProps) {
     const { jsonData } = useSettings();
     let r = <>
         <h4>{props.expWorthPhrase} selection for source state s_{props.nodeData.data.source_state}:</h4>
@@ -330,7 +343,7 @@ function QValueTable(props) {
                         </>))}
                     </td>
                     <td key={'isUnDom_' + actLabel}>{qVals.containsUndominated ? "true" : "false"}</td>
-                    {jsonData.Non_Moral!==-1 &&
+                    {jsonData.Non_Moral!==-1 && budget &&
                         <td key={'isOverBudget_' + actLabel}>
                             {qVals.QValues.every(qv=> qv.Value[jsonData.Non_Moral] < (budget*-1)) 
                                 ? "true" : "false"}

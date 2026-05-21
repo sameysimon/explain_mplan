@@ -1,15 +1,24 @@
 import WinBox from 'react-winbox';
 import RenderWorth from '../../../common/RenderWorth';
 import RenderProb from '../../../common/RenderProbability';
-import { useSettings } from '../../../Settings';
+import { useSettings, JsonData } from '../../../Settings';
 import { HistoryTable } from '../../../common/historyTable';
-import { InlineMath } from 'react-katex';
 import { getConsiderations } from '../../../Utility';
+import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import ArgumentAttack from './TextAttack';
 import EndUserJustify from './EndUser';
+import AlgorithmJustify from './AlgorithmUser';
 import React, { useEffect, useRef } from 'react';
 import RenderHistory from '../../../common/RenderHistory';
+
+export type CriticalQuestionsProps = {
+    attack:boolean|Attack;
+    onClose:() => void;
+    jsonData:JsonData;
+    getHistoryProp:(piIdx: any, hIdx: any, propName: any, fallback?: string) => any;
+    getSolutionProp:(piIdx: any, propName: any, fallback?: string) => any;
+}
 
 export type Attack = {
     SourcePolicyIdx:number;
@@ -19,11 +28,19 @@ export type Attack = {
     Theory:number;
 };
 
+export type JustifyProps = {
+    attack:Attack;
+    theory:string;
+    theoryType:string;
+    considerations:string[]
+}
 
-
-export function CriticalQuestions(props) {
+export function CriticalQuestions(props: CriticalQuestionsProps) {
         const { userType } = useSettings();
         const { jsonData } = useSettings();
+        if (!props.attack || typeof props.attack === 'boolean') {
+            return null;
+        }
         let attack = props.attack;
         let getSolutionProp = props.getSolutionProp;
         let getHistoryProp = props.getHistoryProp;
@@ -40,14 +57,14 @@ export function CriticalQuestions(props) {
         let cq1 = `W^{h_{${attack.SourceHistoryIdx}}}[0](s_0) \\succ_{${theory}} W^{h_{${attack.TargetHistoryIdx}}}[0](s_0)`;
         let cq2 = `\\mathcal{Q}^{\\pi_{${attack.SourcePolicyIdx}}}(s_0, \\pi_{${attack.SourcePolicyIdx}}(s_0,0) )  \\succ_{${theory}}  \\mathcal{Q}^{\\pi_{${attack.TargetPolicyIdx}}}(s_0, \\pi_{${attack.TargetPolicyIdx}}(s_0,0) )`;
         
-        const winBoxRef = useRef(null);
+        const winBoxRef = useRef<WinBox>(null);
 
         useEffect(()=> {
-            winBoxRef.current.focus();
+            winBoxRef.current?.focus();
         },[]);
         
         
-        function AlgorithmCQ() {
+/*        function AlgorithmCQ() {
             return <>
                 <h2>Critical Questions</h2> 
                 <p>Argument Attack:</p>
@@ -61,11 +78,7 @@ export function CriticalQuestions(props) {
                         <br/>
                         {sourceHistoryWorthTh} <InlineMath className="hCentre" math={"\\succ_{" + "}"}/> {targetHistoryWorthTh}
                     </div>
-
-                    
-
                 <p><b>CQ2:</b> Is there greater foresight or expectation that the target policy will violate the moral principle more than the source?</p>
-
                 Yes.
                 <div className='hCentre'>
                     <InlineMath className="hCentre" math={cq2} />
@@ -77,7 +90,7 @@ export function CriticalQuestions(props) {
                 <p>Thus, by moral theory {theory}, there is negative retrospection on history <InlineMath math={`h_{${attack.TargetHistoryIdx}}`}/> for selecting policy <InlineMath math={`\\pi_{${attack.TargetPolicyIdx}}`}/>,
                 because of history <InlineMath math={`h_{${attack.SourceHistoryIdx}}`}/> by policy <InlineMath math={`\\pi_{${attack.TargetPolicyIdx}}`}/>.</p>
                 </>
-        }
+        }*/
 
         function DomainCQ() {
             return <>
@@ -105,10 +118,10 @@ export function CriticalQuestions(props) {
         return <WinBox title="Explain Attack" width={Math.max(window.innerWidth/3, 300)} height={Math.max(window.innerHeight/2, 300)} onClose={props.onClose} ref={winBoxRef} >
             <div className='ContentBox'>
                 {userType==="User" &&
-                    <EndUserJustify attack={attack} theory={theory} considerations={considers}/>
+                    <EndUserJustify attack={attack} theory={theory} considerations={considers} theoryType={jsonData.Theories[attack.Theory].Type} />
                 }
                 {userType==="Algorithm designer" &&
-                    <AlgorithmCQ/>
+                    <AlgorithmJustify attack={attack} theory={theory} considerations={considers} theoryType={jsonData.Theories[attack.Theory].Type} />
                 }
                 {userType==="Domain designer" &&
                     <DomainCQ/>

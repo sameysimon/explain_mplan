@@ -15,7 +15,7 @@ export default function ArgumentAttack(props:any) {
     let considers = getConsiderations(thName, jsonData);
 
     let sourcePolicyWorth = <RenderWorth worth={jsonData.Solutions[props.attack.SourcePolicyIdx].Expectation}  />;
-    let targetPolicyWorth = <RenderWorth worth={jsonData.Solutions[props.attack.TargetHistoryIdx].Expectation} />;
+    let targetPolicyWorth = <RenderWorth worth={jsonData.Solutions[props.attack.TargetPolicyIdx].Expectation} />;
     let sourceHistoryWorth = <RenderWorth worth={jsonData.Histories[props.attack.SourcePolicyIdx][props.attack.SourceHistoryIdx].Worth} considerations={considers} />;
     let targetHistoryWorth = <RenderWorth worth={jsonData.Histories[props.attack.TargetPolicyIdx][props.attack.TargetHistoryIdx].Worth} considerations={considers} />;
     let sourceHistoryProbability = <RenderProb piIdx={props.attack.SourcePolicyIdx} hIdx={props.attack.SourceHistoryIdx} data={jsonData}/>;
