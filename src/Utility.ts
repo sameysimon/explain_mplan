@@ -21,19 +21,23 @@ export const argmin = (nums:number[]) => {
 
 
 
-// Recursively set show for descendants of a node by id
-export const setShowRecursive = (node, targetId, value) => {
-    if (node.id === targetId) {
+// Recursively set show for descendants of a node by its unique path key.
+export const setShowRecursive = (node: TreeNode, targetPathKey: string, value: boolean) => {
+    if (node.pathKey === targetPathKey) {
         if (node.children) {
-            node.children.forEach(child => { child.show = value; });
+            node.children.forEach((child: TreeNode) => { child.show = value; });
         }
         return true;
     }
+
     if (node.children) {
-        for (let child of node.children) {
-            if (setShowRecursive(child, targetId, value)) return true;
+        for (const child of node.children) {
+            if (setShowRecursive(child, targetPathKey, value)) {
+                return true;
+            }
         }
     }
+
     return false;
 };
 
@@ -84,6 +88,7 @@ export const findPolicyWithState = (source_state:number, jsonData:JsonData) => {
 
 export interface TreeNode {
     id: number | string;
+    pathKey?: string;
     type: 'state' | 'action';
     isGoal:boolean;
     show: boolean;
@@ -98,8 +103,24 @@ export interface TreeNode {
     counterAction?:boolean;
 }
 
+const buildPathKey = (parentKey: string | undefined, type: TreeNode['type'], id: number | string, label?: string) => {
+    const base = parentKey ?? "root";
+    return `${base}/${type}:${String(id)}:${String(label ?? "")}`;
+};
+
 export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[]) => {
-    var tree:TreeNode = {id: 0, type:'state', isGoal:false, show: true, info: json.State_tags ? json.State_tags[0] : "", selected: false, children: [], source_state: 0, label: "0"};
+    var tree:TreeNode = {
+        id: 0,
+        pathKey: buildPathKey(undefined, 'state', 0, '0'),
+        type:'state',
+        isGoal:false,
+        show: true,
+        info: json.State_tags ? json.State_tags[0] : "",
+        selected: false,
+        children: [],
+        source_state: 0,
+        label: "0"
+    };
     if (!counter_policies) {
         counter_policies = [];
     }
@@ -109,12 +130,14 @@ export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[
 
 export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:number, counterPiIdxs:number[]) => {
     if (node.type === 'state') {
+        const transitions = json.State_transitions as Record<string, Record<string, number[][]>>;
         let policyAction = getAction(piIdx, node.id as number, json);
         let counterActions = counterPiIdxs.map((i)=> getAction(i, node.id as number, json)).flat(1);
-        for (const actionStr of Object.keys(json.State_transitions[node.id])) {
+        for (const actionStr of Object.keys(transitions[String(node.id)] ?? {})) {
             let actionID = "s_" + node.id + "a_" + actionStr;
             var a: TreeNode = {
                 id: actionID,
+                pathKey: buildPathKey(node.pathKey, 'action', actionID, actionStr),
                 label: actionStr,
                 info: 'Action',
                 type: 'action',
@@ -131,13 +154,15 @@ export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:
             node.children.push(a);
         }
     } else if (node.type === 'action') {
-        let successors = json.State_transitions[node.source_state][node.label];
+        const transitions = json.State_transitions as Record<string, Record<string, number[][]>>;
+        let successors = transitions[String(node.source_state)][String(node.label)];
         for (const scr of successors) {
             var s: TreeNode = {
                 id: scr[1],
+                pathKey: buildPathKey(node.pathKey, 'state', scr[1], String(scr[1])),
                 type: 'state',
                 isGoal: json.Goals ? json.Goals.includes(scr[1]) : false,
-                label: scr[1],
+                label: String(scr[1]),
                 edgeLabel: Math.round(scr[0] * 1_000) / 1_000,
                 info : json.State_tags ? json.State_tags[scr[1]] : "",
                 show: showState,

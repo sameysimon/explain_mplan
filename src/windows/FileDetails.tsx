@@ -33,41 +33,49 @@ export default function FileDetails(props:DetailsProps) {
                 
                 <tbody>
                     <tr><td>Domain</td> <td>{jsonData.Domain}</td></tr>
-                    <tr><td>States</td> <td>{jsonData.Total_states}</td></tr>
+                    <tr><td>Proper Pareto Coverage Set Policies</td> <td>{jsonData.SolutionTotal}</td></tr>
+                    <tr><td>Minimal Non-Acceptability Policies</td> <td>{jsonData.Num_Min_Non_Acceptability}</td></tr>
+                    <tr><td>State-time Pairs</td> <td>{jsonData.Total_states}</td></tr>
                     <tr><td>Horizon</td> <td>{jsonData.Horizon}</td></tr>
-                    <tr><td>Iterations</td> <td>{jsonData.Iterations}</td></tr>
+                    <tr><td>AO* Expansions</td> <td>{jsonData.Iterations}</td></tr>
                     <tr><td>Backups</td> <td>{jsonData.Backups}</td></tr>
-                    <tr><td>Expansions</td> <td>{jsonData.Expanded}</td></tr>
+                    <tr><td>Expanded States</td> <td>{jsonData.Expanded} (<RoundProb value={(jsonData.Expanded / jsonData.Total_states) * 100} decimal_places={2}/>%)</td></tr>
                 </tbody>
             </table>
             <h2>Processing details</h2>
             <table className='myTable'>
                 <thead>
-                    <tr><th>Process Stage</th> <th>Duration</th> <th>Duration %</th></tr>
+                    <tr><th>Process Stage</th>
+                    <th>Duration (mi s)</th>
+                    <th>Duration (s)</th>
+                    <th>Duration %</th></tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>Planning Time</td>
                         <td>{jsonData.Duration_Plan}</td>
+                        <td><RoundProb value={jsonData.Duration_Plan/1_000_000}/></td>
                         <td><RoundProb value={100 * jsonData.Duration_Plan/jsonData.Duration_Total}/></td>
                     </tr>
 
                     <tr>
                         <td>Solution Extraction Time</td>
                         <td>{jsonData.Duration_Sols}</td>
+                        <td><RoundProb value={jsonData.Duration_Sols/1_000_000}/></td>
                         <td><RoundProb value={100 * jsonData.Duration_Sols/jsonData.Duration_Total}/></td>
                     </tr>
                     <tr>
                         <td>MEHR Time</td>
                         <td>{jsonData.Duration_MEHR}</td>
+                        <td><RoundProb value={jsonData.Duration_MEHR/1_000_000}/></td>
                         <td><RoundProb value={100 * jsonData.Duration_MEHR/jsonData.Duration_Total}/></td>
                     </tr>
                     <tr>
                         <td>Total Time</td>
                         <td>{jsonData.Duration_Total}</td>
+                        <td><RoundProb value={jsonData.Duration_Total/1_000_000}/></td>
                         <td><RoundProb value={100}/></td>
                     </tr>
-                    
                 </tbody>
             </table>
             

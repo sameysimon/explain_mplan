@@ -5,12 +5,15 @@ import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
 export function RoundProb(props) {
-    let key = "";
-    if (props.key) {
-        key = props.key;
-    }
+    const key = props.key ?? "";
+    const decimals = Number.isInteger(props.decimal_places) && props.decimal_places >= 0
+        ? props.decimal_places
+        : 3;
+    const mult = 10 ** decimals;
+    const roundedValue = Math.round(props.value * mult) / mult;
+
     return <span className="worthElement tooltip" key={`${key}_rp_span`}>
-        {Math.round(props.value * 1_000) / 1_000}
+        {roundedValue}
         {!props.noToolTip && 
             <span className="tooltiptext" key={`${key}_rpTooltipText`}>{props.value}</span>
         }

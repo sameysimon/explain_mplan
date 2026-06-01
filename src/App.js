@@ -90,17 +90,17 @@ export default function App() {
     // EVENT HANDLERS
     //
     // Handler to be passed to Canvas
-    const toggleShow = (id, value) => {
+    const toggleShow = (pathKey, value) => {
         // Deep copy tree to avoid mutating state directly
         const newTree = JSON.parse(JSON.stringify(tree));
-        setShowRecursive(newTree, id, value);
+        setShowRecursive(newTree, pathKey, value);
         setTree(newTree);
     };
     const nodeClicked = (e, d) => {
         if (e.shiftKey) {
             // Toggle show for this node and its descendants
             const shouldShow = !d.children?.some(child => child.data.show);
-            toggleShow(d.data.id, shouldShow);
+            toggleShow(d.data.pathKey, shouldShow);
             setNode(d);
         } else {
             setNode(d);
@@ -177,7 +177,7 @@ export default function App() {
         { tree == null ? <></> :
             <>
             <>Current policy is {currentPolicyIdx} of {jsonData.Solutions.length}</>
-            <select name="policy" id="policySelect" value={currentPolicyIdx} onChange={function(e){setPolicy(e.target.value);}}>
+            <select name="policy" id="policySelect" value={currentPolicyIdx} onChange={function(e){setPolicy(parseInt(e.target.value));}}>
             Selected Policy {Array.from({ length : jsonData.Solutions.length}, (_, i) => (
                 <option key={`select_pi_${i}`} value={i}>Policy {i} w/ {jsonData.Solutions[i].Acceptability} non-acc.</option>
                 ))}

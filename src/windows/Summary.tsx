@@ -121,7 +121,7 @@ export default function Summary(props:{width:number, height:number, setPolicy:(a
             <tbody>
                 {minNaccList.map((sol, solIdx)=> (
                     <tr key={`solSumRow${solIdx}`}>
-                        <td key={`solSumRow${solIdx}_pi`}><RenderPolicy key={`solSumRow_${solIdx}_renderPolicy`} id={sol}/></td>
+                        <td key={`solSumRow${solIdx}_pi`}><RenderPolicy html_key={`solSumRow_${solIdx}_renderPolicy`} id={sol}/></td>
                         <td key={`solSumRow${solIdx}_worth`}><RenderWorth key={`solSumRow_${solIdx})renderPolicyExp`} worth={jsonData.Solutions[sol].Expectation}/></td>
                         <td key={`solSumRow${solIdx}_acc`}><RoundProb key={`solSumRow_${solIdx})roundProb`} value={jsonData.Solutions[sol].Acceptability} /></td>
                         <td key={`solSumRow${solIdx}_vis`}>

@@ -4,14 +4,14 @@ import { InlineMath } from 'react-katex';
 import { useEffect, useRef, useState } from "react";
 import ContextMenu from "./ContextMenu";
 
-export default function RenderPolicy(props:{id:number, noClick?:boolean, key?:string}) {
+export default function RenderPolicy(props:{id:number, noClick?:boolean, html_key?:string}) {
     const { jsonData, highlightFn, currentPolicyIdx, counterPoliciesIdx,
-            addCounterPolicy, setConsiderationView } = useSettings();
+            addCounterPolicy, setConsiderationView, currConsIdx } = useSettings();
     const [contextMenu, setContextMenu] = useState({x:0, y:0, toggled:false});
     const contextMenuRef = useRef(null);
 
     let key = "";
-    if (props.key) {key=props.key;}
+    if (props.html_key) {key=props.html_key;}
     
     function clearMenu() {
         setContextMenu({x:0, y:0, toggled:false});
@@ -66,10 +66,18 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, key?:st
         });
     }
     jsonData.Considerations.map((c, i) => {
-        btns.push({
+        if (currConsIdx!== i) {
+            btns.push({
             text: `View successors by ${c.Name}`,
             onClick: () => { setConsiderationView(props.id, -1, i); clearMenu(); }
-        });
+            });
+        } else {
+            btns.push({
+            text: `Remove view successors by ${c.Name}`,
+            onClick: () => { setConsiderationView(props.id, -1, -1); clearMenu(); }
+            });
+        }
+        
     });
     
     return (<>

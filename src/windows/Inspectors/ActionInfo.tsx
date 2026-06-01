@@ -56,7 +56,6 @@ export function ActionInfo(props: ActionInfoProps) {
     const [necessaryPolicies, setNecessaryPolicies] = useState<number[]|null>([]);
     const [cause, setCause] = useState<string|null>(null);
 
-    let expWorthPhrase = userType==="User" ? "expected worth" : "Q-value";
     
     useEffect(()=>{
         // On new new action node, check cache for Action_cause
@@ -178,7 +177,7 @@ export function ActionInfo(props: ActionInfoProps) {
     let body = <>
         <h2>Action '{props.nodeData.data.label}' on State {props.nodeData.data.source_state}</h2>
         <h3>Action outcomes</h3>
-        <TransitionTable transitions={jsonData.State_transitions[props.nodeData.data.source_state][props.nodeData.data.label]}/>
+        <TransitionTable source_state={props.nodeData.data.source_state} action_label={props.nodeData.data.label}/>
         <h3>Use in policies:</h3>
         {polsWithState.length===0 ?
             <p>
@@ -209,7 +208,6 @@ export function ActionInfo(props: ActionInfoProps) {
         }
         {allActionsQValues && cause!==null && 
             <QValueTable 
-                expWorthPhrase={expWorthPhrase}
                 nodeData={props.nodeData}
                 allActionsQValues={allActionsQValues}
                 causeCategory={cause} 
@@ -232,7 +230,7 @@ export function ActionInfo(props: ActionInfoProps) {
 
         {cause && cause.includes('MEHR') &&
             <button onClick={queryMEHR}>
-                Why is action '{props.nodeData.data.label}' preferred by MEHR?
+                Why is action '{props.nodeData.data.label}' defeated in MEHR?
             </button>
         }
         
@@ -254,7 +252,7 @@ export function ActionInfo(props: ActionInfoProps) {
             <tbody>{necessaryPolicies.map((pi_idx, i) => {
                     const budget = jsonData.Non_Moral!==-1 ? jsonData.Considerations[jsonData.Non_Moral].Budget : undefined;
                     return <tr>
-                    <td key={`necc_pols_pi_${i}`}> <RenderPolicy id={pi_idx} key={`necc_pols_rpi_${i}`} /> </td>
+                    <td key={`necc_pols_pi_${i}`}> <RenderPolicy id={pi_idx} html_key={`necc_pols_rpi_${i}`} /> </td>
                     <td key={`necc_pols_w_${i}`}> <RenderWorth worth={jsonData.Solutions[pi_idx].Expectation} key={`necc_pols_rw_${i}`} /> </td>
                     {budget &&
                        <td key={`necc_pols_b_${i}`}>
@@ -309,16 +307,16 @@ export function ActionInfo(props: ActionInfoProps) {
 }
 
 interface QValueTableProps {
-    expWorthPhrase: string;
     nodeData: CanvasNode;
     allActionsQValues: {[key:string]: ActionsQValuesType};
     causeCategory: string;
 }
 
-function QValueTable(props:QValueTableProps) {
-    const { jsonData } = useSettings();
+export function QValueTable(props:QValueTableProps) {
+    const { jsonData, userType } = useSettings();
+    let expWorthPhrase = userType==="User" ? "expected worth" : "Q-value";
     let r = <>
-        <h4>{props.expWorthPhrase} selection for source state s_{props.nodeData.data.source_state}:</h4>
+        <h4>{expWorthPhrase} selection for source state s_{props.nodeData.data.source_state}:</h4>
         <table className="myTable">
             <thead>
                 <tr>

@@ -126,10 +126,11 @@ details summary {
       position: relative;
       display: inline-block;
       cursor: pointer;
+      width: fit-content;
     }
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 140px;
+    width: fit-content;
     background-color: black;
     color: #fff;
     text-align: center;

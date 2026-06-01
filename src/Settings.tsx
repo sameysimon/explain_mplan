@@ -50,8 +50,9 @@ export interface JsonData {
     Max_histories:number;
     Min_histories:number;
     Min_non_accept:number;
-    Total_states?:number;
+    Total_states:number;
     Total_Ranks:number
+    Num_Min_Non_Acceptability:number;
     
     Domain?:string
 
@@ -89,6 +90,7 @@ export function createDefaultJsonData(): JsonData {
         Duration_Plan: 0,
         Duration_Sols: 0,
         Duration_Total: 0,
+        Num_Min_Non_Acceptability:0,
         Horizon: 0,
         Max_histories: 0,
         Min_histories: 0,
