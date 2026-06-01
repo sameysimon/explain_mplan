@@ -1,8 +1,8 @@
 import WinBox from 'react-winbox';
-import PolicyTable from '../common/PolicyTable.js';
+import PolicyTable from '../DisplayInfo/PolicyTable.js';
 import { useSettings } from '../Settings.tsx';
 import { useState, useEffect } from "react";
-import { RoundProb } from '../common/RenderProbability.js';
+import { RoundProb } from '../DisplayInfo/RenderProbability.js';
 
 type DetailsProps = {
     spacing: [number, number];
@@ -33,6 +33,7 @@ export default function FileDetails(props:DetailsProps) {
                 
                 <tbody>
                     <tr><td>Domain</td> <td>{jsonData.Domain}</td></tr>
+                    <tr><td>Reachable Unique Policies</td> <td>{jsonData.Total_reachable_policies}</td></tr>
                     <tr><td>Proper Pareto Coverage Set Policies</td> <td>{jsonData.SolutionTotal}</td></tr>
                     <tr><td>Minimal Non-Acceptability Policies</td> <td>{jsonData.Num_Min_Non_Acceptability}</td></tr>
                     <tr><td>State-time Pairs</td> <td>{jsonData.Total_states}</td></tr>

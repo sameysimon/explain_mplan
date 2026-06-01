@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Query } from  "../../generic";
 import { Solution, Attack, useSettings } from "../../Settings";
-import RenderWorth from "../../common/RenderWorth";
-import RenderPolicy from "../../common/RenderPolicy";
-import { TransitionTable } from "./transitionTable";
+import RenderWorth from "../../Renderers/RenderWorth";
+import RenderPolicy from '../../Renderers/RenderPolicy';
+import { TransitionTable } from "../../DisplayInfo/transitionTable";
 import { findPolicyWithState, findPolicyWithStateAction, getAction, TreeNode } from "../../Utility";
 import { CanvasNode } from '../../Canvas';
 

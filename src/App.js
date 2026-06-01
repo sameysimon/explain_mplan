@@ -6,7 +6,7 @@ import 'katex/dist/katex.min.css';
 import Summary from './windows/Summary.tsx';
 import Canvas from './Canvas.tsx';
 import FileDetails from './windows/FileDetails.tsx'
-import Inspector from './windows/Inspectors/Base.js'
+import Inspector from './Inspector.js'
 import ExplainMEHR from './windows/MEHR.js'
 import { Query } from './generic.js';
 

@@ -1,4 +1,4 @@
-import { RoundProb } from "./common/RenderProbability";
+import { RoundProb } from "./DisplayInfo/RenderProbability";
 import type { JsonData, Solution } from "./Settings";
 
 

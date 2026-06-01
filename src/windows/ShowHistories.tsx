@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import WinBox from 'react-winbox';
 import { Attack, useSettings } from "../Settings.tsx";
-import RenderPolicy from '../common/RenderPolicy.tsx';
-import RenderWorth from '../common/RenderWorth.tsx';
-import { RoundProb } from '../common/RenderProbability.js';
+import RenderPolicy from '../Renderers/RenderPolicy';
+import RenderWorth from '../Renderers/RenderWorth.tsx';
+import { RoundProb } from '../DisplayInfo/RenderProbability.js';
 
 
 export default function PolicyHistories(props:{policyIdx:number}) {

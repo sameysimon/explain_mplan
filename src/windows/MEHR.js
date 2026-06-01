@@ -1,10 +1,10 @@
 import WinBox from 'react-winbox';
-import RenderWorth from '../common/RenderWorth';
+import RenderWorth from '../Renderers/RenderWorth';
 import { useState } from 'react'; 
-import { CriticalQuestions } from './Inspectors/ExplainAttack/CriticalQuestions';
+import { CriticalQuestions } from './Explain/CriticalQuestions';
 import { useSettings } from '../Settings';
-import RenderPolicy from '../common/RenderPolicy';
-import { RoundProb } from '../common/RenderProbability';
+import RenderPolicy from '../Renderers/RenderPolicy';
+import { RoundProb } from '../DisplayInfo/RenderProbability';
 import { InlineMath } from 'react-katex';
 
 

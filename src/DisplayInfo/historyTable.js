@@ -1,4 +1,4 @@
-import RenderWorth from "./RenderWorth.tsx";
+import RenderWorth from "../Renderers/RenderWorth.tsx";
 import { useSettings } from "../Settings.tsx";
 import { getAction } from "../Utility.ts";
 import { RoundProb } from "./RenderProbability.js";

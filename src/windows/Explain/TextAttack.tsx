@@ -1,8 +1,8 @@
-import RenderWorth from '../../../common/RenderWorth';
-import { useSettings } from '../../../Settings';
+import RenderWorth from '../../Renderers/RenderWorth.tsx';
+import { useSettings } from '../../Settings.tsx';
 import 'katex/dist/katex.min.css';
-import { getConsiderations } from '../../../Utility';
-import RenderProb from '../../../common/RenderProbability';
+import { getConsiderations } from '../../Utility.ts';
+import RenderProb from '../../DisplayInfo/RenderProbability.js';
 import { CriticalQuestions } from './CriticalQuestions.tsx';
 import { InlineMath } from 'react-katex';
 import RenderPolicy from '../../../common/RenderPolicy.tsx';

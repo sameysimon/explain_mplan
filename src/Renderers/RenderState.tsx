@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { useSettings } from "../Settings.tsx" ;
 import { TreeNode } from "../Utility.js";
-import { SearchRescueGraph } from "./SearchRescueGraph.js";
+import { SearchRescueGraph } from "../DisplayInfo/SearchRescueGraph.js";
 
 // Note: Ensure the HierarchyPointNode type parameter matches your tree structure
 export function RenderState(props: {nodeData: d3.HierarchyPointNode<TreeNode>, small?:boolean, key?: string}) {

@@ -4,8 +4,8 @@ import { createPortal } from "react-dom"; // <-- Import createPortal
 import { useSettings } from "./Settings.tsx";
 import { TreeNode } from "./Utility.ts";
 import FileDetails from "./windows/FileDetails.tsx";
-import {RenderState} from "./common/RenderState.tsx";
-import { TransitionTable } from "./windows/Inspectors/transitionTable.js";
+import {RenderState} from "./Renderers/RenderState.tsx";
+import { TransitionTable } from "./DisplayInfo/transitionTable.js";
 
 
 export type CanvasNode = d3.HierarchyPointNode<TreeNode>;
@@ -255,7 +255,7 @@ export default function Canvas(props : CanvasProps) {
 
         zoomGroup.selectAll(".node").raise();
 
-    }, [horizon, props.tree, spacing, props.scrColors]);
+    }, [horizon, node, props.tree, spacing, props.scrColors]);
 
     useEffect(() => {
         const zoomGroup = d3.select(ref.current).select(".zoomGroup");

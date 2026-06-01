@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import WinBox from 'react-winbox';
 import { Attack, useSettings } from "../Settings.tsx";
-import RenderWorth from '../common/RenderWorth.tsx';
+import RenderWorth from '../Renderers/RenderWorth.tsx';
 import { Query } from '../generic.js';
-import RenderPolicy from '../common/RenderPolicy.tsx';
-import RenderHistory from '../common/RenderHistory.tsx';
+import RenderPolicy from '../Renderers/RenderPolicy';
+import RenderHistory from '../Renderers/RenderHistory.tsx';
 import PolicyHistories from './ShowHistories.tsx';
-import { RoundProb } from '../common/RenderProbability.js';
+import { RoundProb } from '../DisplayInfo/RenderProbability.js';
 
 export default function Summary(props:{width:number, height:number, setPolicy:(a:number)=>void}) {
     const { jsonData, setJsonData, userType } = useSettings();

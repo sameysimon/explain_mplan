@@ -1,6 +1,6 @@
-import { RoundProb } from "../../common/RenderProbability";
-import RenderWorth from "../../common/RenderWorth";
-import { useSettings } from "../../Settings.tsx";
+import { RoundProb } from "./RenderProbability.js";
+import RenderWorth from "../Renderers/RenderWorth.tsx";
+import { useSettings } from "../Settings.tsx";
 
 
 export function TransitionTable(props) {

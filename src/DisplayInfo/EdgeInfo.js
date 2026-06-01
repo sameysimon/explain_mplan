@@ -1,4 +1,4 @@
-import { useSettings } from '../../Settings.tsx';
+import { useSettings } from '../Settings.tsx';
 
 
 export function EdgeInfo(props) {

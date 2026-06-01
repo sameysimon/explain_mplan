@@ -1,13 +1,13 @@
-import RenderWorth from '../../../common/RenderWorth';
-import { useSettings } from '../../../Settings';
+import RenderWorth from '../../Renderers/RenderWorth.tsx';
+import { useSettings } from '../../Settings.tsx';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
-import { RoundProb } from '../../../common/RenderProbability';
+import { RoundProb } from '../../DisplayInfo/RenderProbability.js';
 import {  Attack, JustifyProps } from './CriticalQuestions.tsx';
-import RenderPolicy from '../../../common/RenderPolicy.tsx';
-import ArgumentAttack from './TextAttack';
-import RenderHistory from '../../../common/RenderHistory.tsx';
-import { argmin, variance } from '../../../Utility.ts';
+import RenderPolicy from '../../Renderers/RenderPolicy.tsx';
+import ArgumentAttack from './TextAttack.tsx';
+import RenderHistory from '../../Renderers/RenderHistory.tsx';
+import { argmin, variance } from '../../Utility.ts';
 
 
 

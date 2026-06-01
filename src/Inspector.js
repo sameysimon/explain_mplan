@@ -1,7 +1,7 @@
 import WinBox from 'react-winbox';
-import { StateInfo } from './StateInfo.js';
-import { EdgeInfo } from './EdgeInfo.js';
-import { ActionInfo } from './ActionInfo.tsx';
+import { StateInfo } from './DisplayInfo/StateInfo.js';
+import { EdgeInfo } from './DisplayInfo/EdgeInfo.js';
+import { ActionInfo } from './windows/Inspectors/ActionInfo.tsx';
 
 export default function Inspector(props) {
     const width = 350;

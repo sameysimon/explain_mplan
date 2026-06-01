@@ -1,6 +1,4 @@
-import { useSettings } from "../../Settings.tsx";
-import { SearchRescueGraph } from "../../common/SearchRescueGraph.js";
-import { RenderState } from "../../common/RenderState.tsx";
+import { RenderState } from "../Renderers/RenderState.tsx";
 
 export function StateInfo(props) {
     return <div className="ContentBox">

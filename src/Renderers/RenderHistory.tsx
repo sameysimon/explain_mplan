@@ -2,7 +2,7 @@ import RenderWorth from "./RenderWorth";
 import { useSettings } from "../Settings";
 import { InlineMath } from 'react-katex';
 import { useEffect, useRef, useState } from "react";
-import ContextMenu from "./ContextMenu";
+import ContextMenu from "../common/ContextMenu";
 
 export default function RenderHistory(props:{policyIdx:number, historyIdx:number}) {
     const { jsonData, highlightFn, highlights, setConsiderationView } = useSettings();

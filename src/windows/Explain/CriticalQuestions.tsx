@@ -1,16 +1,16 @@
 import WinBox from 'react-winbox';
-import RenderWorth from '../../../common/RenderWorth';
-import RenderProb from '../../../common/RenderProbability';
-import { useSettings, JsonData } from '../../../Settings';
-import { HistoryTable } from '../../../common/historyTable';
-import { getConsiderations } from '../../../Utility';
+import RenderWorth from '../../Renderers/RenderWorth';
+import RenderProb from '../../DisplayInfo/RenderProbability';
+import { useSettings, JsonData } from '../../Settings';
+import { HistoryTable } from '../../DisplayInfo/historyTable';
+import { getConsiderations } from '../../Utility';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import ArgumentAttack from './TextAttack';
 import EndUserJustify from './EndUser';
 import AlgorithmJustify from './AlgorithmUser';
 import React, { useEffect, useRef } from 'react';
-import RenderHistory from '../../../common/RenderHistory';
+import RenderHistory from '../../Renderers/RenderHistory';
 
 export type CriticalQuestionsProps = {
     attack:boolean|Attack;
@@ -36,8 +36,13 @@ export type JustifyProps = {
 }
 
 export function CriticalQuestions(props: CriticalQuestionsProps) {
-        const { userType } = useSettings();
-        const { jsonData } = useSettings();
+        const { userType, jsonData } = useSettings();
+        const winBoxRef = useRef<WinBox>(null);
+
+        useEffect(()=> {
+            winBoxRef.current?.focus();
+        },[]);
+
         if (!props.attack || typeof props.attack === 'boolean') {
             return null;
         }
@@ -56,13 +61,6 @@ export function CriticalQuestions(props: CriticalQuestionsProps) {
 
         let cq1 = `W^{h_{${attack.SourceHistoryIdx}}}[0](s_0) \\succ_{${theory}} W^{h_{${attack.TargetHistoryIdx}}}[0](s_0)`;
         let cq2 = `\\mathcal{Q}^{\\pi_{${attack.SourcePolicyIdx}}}(s_0, \\pi_{${attack.SourcePolicyIdx}}(s_0,0) )  \\succ_{${theory}}  \\mathcal{Q}^{\\pi_{${attack.TargetPolicyIdx}}}(s_0, \\pi_{${attack.TargetPolicyIdx}}(s_0,0) )`;
-        
-        const winBoxRef = useRef<WinBox>(null);
-
-        useEffect(()=> {
-            winBoxRef.current?.focus();
-        },[]);
-        
         
 /*        function AlgorithmCQ() {
             return <>
