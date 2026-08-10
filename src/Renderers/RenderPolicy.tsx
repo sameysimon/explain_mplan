@@ -1,14 +1,18 @@
 import RenderWorth from "./RenderWorth";
 import { useSettings } from "../Settings";
 import { InlineMath } from 'react-katex';
-import { useEffect, useRef, useState } from "react";
-import ContextMenu from "./ContextMenu";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import ContextMenu from "../common/ContextMenu";
+import { createPortal } from "react-dom"; 
+import PolicyHistories from "../windows/ShowHistories";
+
 
 export default function RenderPolicy(props:{id:number, noClick?:boolean, html_key?:string}) {
     const { jsonData, highlightFn, currentPolicyIdx, counterPoliciesIdx,
             addCounterPolicy, setConsiderationView, currConsIdx } = useSettings();
     const [contextMenu, setContextMenu] = useState({x:0, y:0, toggled:false});
-    const contextMenuRef = useRef(null);
+    const [showHistories, setShowHistories] = useState(false);
+    const contextMenuRef = useRef<HTMLMenuElement | null>(null);
 
     let key = "";
     if (props.html_key) {key=props.html_key;}
@@ -18,7 +22,7 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, html_ke
     }
 
     useEffect(()=> {
-        function handler(e) {
+        function handler(e:MouseEvent) {
             if (contextMenuRef.current) {
                 clearMenu();
             }
@@ -29,7 +33,7 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, html_ke
         }
     })
 
-    const rightClick = (e) => {
+    const rightClick = (e: ReactMouseEvent<HTMLElement>) => {
         e.preventDefault();
         // make sure the ref is attached before measuring
         const menuEl = contextMenuRef.current;
@@ -42,17 +46,23 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, html_ke
         let y = e.clientY;
         setContextMenu({x: x, y:y, toggled:true});
     }
-    const mouseEnter = (e) => {
-        console.log(props.id);
+    const mouseEnter = (_e: ReactMouseEvent<HTMLElement>) => {
         let hlt = {piIdx: props.id, hIdx:-1, value: true, setInState: false, isProb:false};
         highlightFn(hlt);
     }
-    const mouseLeave = (e) => {
+    const mouseLeave = (_e: ReactMouseEvent<HTMLElement>) => {
         let hlt = {piIdx: props.id, hIdx:-1, value: false, setInState: false, isProb:false};
         highlightFn(hlt);
     }
 
     let btns = [];
+    btns.push({
+        text:`Open Trajectories Window.`,
+        onClick:()=>{
+            setShowHistories(true);
+            clearMenu();
+        }
+    });
     if (props.id !== currentPolicyIdx) {
         let isRemoving = counterPoliciesIdx.includes(props.id);
         btns.push({
@@ -79,6 +89,7 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, html_ke
         }
         
     });
+
     
     return (<>
         <span key={`renderPolicy${props.id}`} className="tooltip" onContextMenu={rightClick}
@@ -103,6 +114,11 @@ export default function RenderPolicy(props:{id:number, noClick?:boolean, html_ke
             buttons={btns}
             key={key}
             />
+
+        {showHistories && createPortal(
+            <PolicyHistories policyIdx={props.id} onClose={() => setShowHistories(false)} />,
+            document.body
+        )}
         </>
     );
 }

@@ -8,29 +8,25 @@ import RenderHistory from '../Renderers/RenderHistory.tsx';
 import PolicyHistories from './ShowHistories.tsx';
 import { RoundProb } from '../DisplayInfo/RenderProbability.js';
 
-export default function Summary(props:{width:number, height:number, setPolicy:(a:number)=>void}) {
+export default function Summary(props:{ setPolicy:(a:number)=>void}) {
+    const [box, setBox] = useState({
+        x: "center" as string | number,
+        y: 30 as string | number,
+        width: window.innerWidth * 0.5,
+        height: 'fit-content',
+    });
     const { jsonData, setJsonData, userType } = useSettings();
     const [ showHistories, setShowHistories ] = useState(-1);
 
-    // Find minimal non-accept action
-    let minNaccIdx=0;
-    let minNaccList = [];
-    for (let i = 1; i < jsonData.Solutions.length; i++) {
-        if (jsonData.Solutions[i].Acceptability < jsonData.Solutions[minNaccIdx].Acceptability) {
-            minNaccIdx = i;
-        }
-    }
-    for (let i = 0; i < jsonData.Solutions.length; i++) {
-        if (jsonData.Solutions[i].Acceptability === jsonData.Solutions[minNaccIdx].Acceptability) {
-            minNaccList.push(i);
-        }
-    }
-
     
-    return <WinBox title='Summary' width={props.width} height={props.height} ><div className="ContentBox">
+    return <WinBox title={"General Summary"}
+        x={'center'} y={50}
+        width={Math.min(window.innerWidth, 720) } height={620}
+        >
+        <div className="ContentBox">
         <h2>What did the system decide?</h2>
         <p>
-            This {jsonData.Domain && ` ${jsonData.Domain}`} problem has {jsonData.Total_states} states and a horizon of {jsonData.Horizon}.
+            This {jsonData.Domain && ` ${jsonData.Domain}`} problem has {jsonData.Total_states} state-time pairs and a horizon of {jsonData.Horizon}.
         </p>
         <p>
             The stakeholder has credence in {jsonData.Theories.length} moral theories
@@ -88,11 +84,11 @@ export default function Summary(props:{width:number, height:number, setPolicy:(a
         </p>
         
         <p>
-            {jsonData.Solutions[minNaccIdx].Acceptability > 0 &&
+            {jsonData.Min_non_accept > 0 &&
             <>There is <i>no completely accepted solution</i> to this problem. This is a generalised case of a <i>moral dilemma</i>. </>
             }
-            {minNaccList.length>1 &&
-                <>There were ${minNaccList.length} minimal non-acceptability policies. </>
+            {jsonData.Num_Min_Non_Acceptability > 1 &&
+                <>There were {jsonData.Num_Min_Non_Acceptability} minimal non-acceptability policies. </>
             }
             Minimal non-acceptability policies are viewed in the table below.
         </p>
@@ -119,7 +115,7 @@ export default function Summary(props:{width:number, height:number, setPolicy:(a
                 </tr>
             </thead>
             <tbody>
-                {minNaccList.map((sol, solIdx)=> (
+                {jsonData.Solutions_Order.slice(0, jsonData.Num_Min_Non_Acceptability).map((sol, solIdx)=> (
                     <tr key={`solSumRow${solIdx}`}>
                         <td key={`solSumRow${solIdx}_pi`}><RenderPolicy html_key={`solSumRow_${solIdx}_renderPolicy`} id={sol}/></td>
                         <td key={`solSumRow${solIdx}_worth`}><RenderWorth key={`solSumRow_${solIdx})renderPolicyExp`} worth={jsonData.Solutions[sol].Expectation}/></td>
@@ -133,9 +129,40 @@ export default function Summary(props:{width:number, height:number, setPolicy:(a
                 
             </tbody>
         </table>
+        {userType==="Domain designer" &&
+            <>
+                <h3>Proper PF Policies:</h3>
+                <table className="myTable">
+                <thead>
+                    <tr>
+                        <th>Policy</th>
+                        <th>Worth</th>
+                        <th>Non-<br/>Accept</th>
+                        <th>Visualise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {jsonData.Solutions_Order.slice(jsonData.Num_Min_Non_Acceptability)
+                    .map((sol) => {
+                    return <tr key={`pfSumRow${sol}`}>
+                        <td key={`pfSumRow${sol}_pi`}><RenderPolicy html_key={`pfSumRow_${sol}_renderPolicy`} id={sol}/></td>
+                        <td key={`pfSumRow${sol}_worth`}><RenderWorth key={`pfSumRow_${sol})renderPolicyExp`} worth={jsonData.Solutions[sol].Expectation}/></td>
+                        <td key={`pfSumRow${sol}_acc`}><RoundProb key={`pfSumRow_${sol})roundProb`} value={jsonData.Solutions[sol].Acceptability} /></td>
+                        <td key={`pfSumRow${sol}_vis`}>
+                            <button onClick={() => {props.setPolicy(sol);}}>Show</button>
+                        </td>
+                    </tr>
+                })}
+                </tbody>
+                </table>
+            </>
+        }
+
+
         {showHistories !== -1 &&
             <PolicyHistories policyIdx={showHistories} />
         }
+        
     </div>
     </WinBox>
 }

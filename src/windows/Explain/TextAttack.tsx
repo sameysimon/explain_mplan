@@ -5,7 +5,7 @@ import { getConsiderations } from '../../Utility.ts';
 import RenderProb from '../../DisplayInfo/RenderProbability.js';
 import { CriticalQuestions } from './CriticalQuestions.tsx';
 import { InlineMath } from 'react-katex';
-import RenderPolicy from '../../../common/RenderPolicy.tsx';
+import RenderPolicy from '../../Renderers/RenderPolicy.tsx';
 
 
 

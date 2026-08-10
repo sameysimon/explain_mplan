@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useSettings } from "../Settings.tsx" ;
 
 export function SearchRescueGraph({
   info,
@@ -12,8 +12,10 @@ export function SearchRescueGraph({
   rx: rxProp, // optional: custom ellipse radii
   ry: ryProp,
 }) {
-  let adjEdge = info['adjEdge'];
-
+  const { jsonData } = useSettings();
+  
+  let adjEdge = jsonData.Domain_Data['AdjEdge'];
+  let comms = jsonData.Domain_Data['Community'];
   const nodeSet = new Set(
     Object.keys(adjEdge)
       .map((k) => Number(k))
@@ -40,7 +42,10 @@ export function SearchRescueGraph({
     const x = cx + rx * Math.cos(theta);
     const y = cy + ry * Math.sin(theta);
     positions.push({ x, y, theta });
-    let lab = "black";
+    let lab = comms[i];
+    if (lab==="") {
+      lab = "grey";
+    }
     if (info["curr_tile"]===node) {
       lab = "green";
     }

@@ -8,6 +8,9 @@ export const removeHighlights = (tree:TreeNode, setTree, setHighlights) => {
     let myStack = [tree_]
     while (myStack.length > 0) {
         let n = myStack.pop();
+        if (!n) {
+            continue;
+        }
         n.highlight=false;
         n.children.forEach(item => myStack.push(item));
     }

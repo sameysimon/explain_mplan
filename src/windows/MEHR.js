@@ -9,7 +9,7 @@ import { InlineMath } from 'react-katex';
 
 
 export default function ExplainMEHR(props) {
-    const { jsonData, setJsonData } = useSettings();
+    const { jsonData, setJsonData, fetchHistories } = useSettings();
     const { highlightFn, highlights, setHighlights, userType } = useSettings();
     const { currentPolicyIdx, setCurrentPolicyIdx } = useSettings();
     const [ cqWindow, setCqWindow ] = useState(false); 
@@ -124,7 +124,7 @@ export default function ExplainMEHR(props) {
             }
         });
         if (missingPolicies.length>0) {
-            props.fetchHistories(missingPolicies);
+            fetchHistories(missingPolicies);
         }
         return r;
 };

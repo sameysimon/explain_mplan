@@ -64,8 +64,12 @@ body {
 .myTable tr:nth-child(even) {
     background-color: #f2f7ff;
 }
-.myTable tr:nth-child(even) {
+.myTable tr:nth-child(odd) {
     background-color: white;
+}
+.myTable tr.highlighted,
+.myTable tr.highlighted td {
+    background-color: #C27AFF !important;
 }
 
 
@@ -111,9 +115,7 @@ details summary {
 .worthElement {
     display: inline;
 }
-.highlighted {
-    background-color:#C27AFF;
-}
+
 
 .argument {
     margin: 0 5px;
@@ -246,4 +248,7 @@ Retrieved 2026-03-04, License - CC BY-SA 4.0
     width: 60%;
     text-align: center;
     transform: translateX(-10px);
+}
+.highlighted {
+    background-color:#C27AFF;
 }

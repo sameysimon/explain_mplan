@@ -146,7 +146,7 @@ export default function Canvas(props : CanvasProps) {
                 let str = "2px";
                 if (d.source.data.highlight && d.target.data.highlight) {
                     col = "#C27AFF";
-                    str = "4px";
+                    str = "6px";
                 }
                 else if (x!= null) {
                     col = `hsl(${120 * (1-x)}, 80%, 45%)`;
@@ -235,7 +235,10 @@ export default function Canvas(props : CanvasProps) {
             });
 
         nodes.merge(nodeEnter)
-            .attr("transform", (d: { x: number; y: number; }) => `translate(${d.x * spacing[0]},${d.y * spacing[1]})`)
+            .attr("transform", (d: { x: number; y: number; data: { highlight?: boolean } ; }) => {
+                const scale = d.data && d.data.highlight ? 1.4 : 1;
+                return `translate(${d.x * spacing[0]},${d.y * spacing[1]}) scale(${scale})`;
+            })
             .attr('fill', (d: { data: { type:string, isGoal:boolean, id: any, policyAction: any; counterAction: any; }; }) => {
                 if (d.data.type==='action') {
                     if (d.data.policyAction) {
@@ -253,7 +256,10 @@ export default function Canvas(props : CanvasProps) {
     
         nodes.exit().remove();
 
-        zoomGroup.selectAll(".node").raise();
+        // Ensure highlighted nodes render above others by ordering DOM children.
+        // Raise non-highlighted nodes first so highlighted ones end up on top.
+        zoomGroup.selectAll(".node").filter((d: any) => !d?.data?.highlight).raise();
+        zoomGroup.selectAll(".node").filter((d: any) => d?.data?.highlight).raise();
 
     }, [horizon, node, props.tree, spacing, props.scrColors]);
 
@@ -288,7 +294,6 @@ export default function Canvas(props : CanvasProps) {
                         overflowY: "auto"
                     }}
                 >
-                    {console.log('hovered node', hoveredNode) === null && <>s</>}
                     {hoveredNode.data.type==='state' &&
                         <RenderState nodeData={hoveredNode} small/>
                     }

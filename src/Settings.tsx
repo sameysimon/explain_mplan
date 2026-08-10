@@ -12,6 +12,7 @@ export interface Solution {
     Action_Map: { [key: string]: string };
     Expectation: { [key: string]: string };
     Acceptability: number;
+    Non_accept_by_theory: number[];
 }
 export interface History {
     Probability:number;
@@ -55,13 +56,15 @@ export interface JsonData {
     Num_Min_Non_Acceptability:number;
     Total_reachable_policies:number;
     
-    Domain?:string
+    Domain_Data?:any; // Arbitrarily structured information about the domain.
+    
+    Domain?:string;
 
     State_time:number[];
     Attacks: { [target_policy_idx: number] : { [source_policy_idx : number] : Attack[] }};
     Histories: History[][];
     Solutions: Solution[];
-    Solutions_order: number[];
+    Solutions_Order: number[];
     InitialSolutionCount:number;
     SolutionTotal:number
     State_transitions: { [stateId: number]: { [action: string]: number[][] } };
@@ -75,7 +78,7 @@ export function createDefaultJsonData(): JsonData {
     return {
         SolutionTotal:0,
         Non_Moral:-1,
-        Solutions_order:[],
+        Solutions_Order:[],
         InitialSolutionCount:0,
         Backups:0,
         Iterations:0,
@@ -110,6 +113,7 @@ export function createDefaultJsonData(): JsonData {
 
 type UserType = 'User'|'Algorithm designer'|'Domain designer';
 interface SettingsContextType {
+  fetchHistories:any;
   userType: UserType;
   setUserType: Dispatch<SetStateAction<UserType>>;
   port:number;
@@ -142,10 +146,10 @@ const SettingsContext = createContext<SettingsContextType|undefined>(undefined);
 export const SettingsProvider = ({ children } : { children: ReactNode }) => {
     const [userType, setUserType] = useState<UserType>('Algorithm designer');// Can be "User" or "Algorithm designer" alternatively
     const [port, setPort] = useState(18080);// Can be "user" alternatively
-    const [jsonData, setJsonData] = useState();
+    const [jsonData, setJsonData] = useState<JsonData>(createDefaultJsonData());
     const [currentPolicyIdx, setCurrentPolicyIdx] = useState(0);
-    const [counterPoliciesIdx, setCounterPoliciesIdx] = useState([]);
-    const [highlights, setHighlights] = useState([]);
+    const [counterPoliciesIdx, setCounterPoliciesIdx] = useState<number[]>([]);
+    const [highlights, setHighlights] = useState<any[]>([]);
     const [highlightFn, setHighlightFn] = useState<any>(()=>()=>{});
   const [tree, setTree] = useState<any>(null);
   const [currConsIdx, setCurrConsIdx] = useState<number|null>(null);
@@ -162,7 +166,7 @@ export const SettingsProvider = ({ children } : { children: ReactNode }) => {
     setCurrentPolicyIdx(currentPolicyIdx);
   };
 
-  const setConsiderationView = (pi_idx, h_idx, new_idx:number|string) => {
+  const setConsiderationView = (pi_idx:number, h_idx:number, new_idx:number|string) => {
     let n = Number(new_idx);
     if (n === -1) {
       setConScrData({});
@@ -171,7 +175,7 @@ export const SettingsProvider = ({ children } : { children: ReactNode }) => {
     }
     Query("SortSuccessors", port,
       h_idx!==-1 ? { policy_idx: pi_idx, hist_idx:h_idx, consideration_idx: n } : { policy_idx: pi_idx, consideration_idx: n },
-      (d) => {
+      (d:any) => {
         let x = d['Successors'];
         setConScrData(x);
         setCurrConsIdx(n);
@@ -179,12 +183,45 @@ export const SettingsProvider = ({ children } : { children: ReactNode }) => {
     );
   };
 
+   const fetchHistories = async (policyIdList:number[]) => {
+        let piIds = policyIdList.filter((piId) => {
+            return !jsonData?.Histories[piId] 
+        });
+        if (piIds.length===0) {
+            return;
+        }
+        let newJSON: JsonData = JSON.parse(JSON.stringify(jsonData));
+        try {
+            const request = {policy_ids: piIds};
+            console.log("req",request);
+            const response = await fetch('http://localhost:18080/Histories', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(request)
+            });
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            const data = await response.json() as Record<string, History[]>;
+            for (const [piID,histories] of Object.entries(data)) {
+                newJSON.Histories[Number(piID)] = histories;
+            }
+        } catch (err) {
+            console.error("Couldn't fetch histories for policies", piIds, err);
+            return;
+        }
+        setJsonData(newJSON);
+        return;
+    }
+
   return (
     <SettingsContext.Provider value={{ 
       userType, port, jsonData, currentPolicyIdx, setUserType, setPort, setJsonData, setCurrentPolicyIdx,
       highlightFn, setHighlightFn, highlights, setHighlights, counterPoliciesIdx, setCounterPoliciesIdx,
       tree, setTree, conScrData, setConScrData, currConsIdx, setCurrConsIdx,
-      addCounterPolicy, setConsiderationView
+      addCounterPolicy, setConsiderationView, fetchHistories
       }}>
       {children}
     </SettingsContext.Provider>

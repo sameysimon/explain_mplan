@@ -10,7 +10,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions":true
+    "allowImportingTsExtensions":true,
+    "target": "es2025"
   },
   "include": [
     "src"

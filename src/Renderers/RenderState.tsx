@@ -47,6 +47,28 @@ export function RenderState(props: {nodeData: d3.HierarchyPointNode<TreeNode>, s
                 {r}
                 {/* Provided fallback 0 for rx and ry to satisfy TS2739 */}
                 <SearchRescueGraph info={info} rx={0} ry={0} />
+                <p>{String(jsonData.Domain_Data["Community"])}</p>
+                <p>{String(jsonData.Domain_Data["AdjEdge"])}</p>
+                <table>
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="border px-4 py-2 text-left">Nodes</th>
+                            <th className="border px-4 py-2 text-left">Adjacent Edges</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(jsonData.Domain_Data["AdjEdge"]).map(([key, value]) => (
+                            <tr key={"AdjEdge_"+key} className="border-t">
+                                <td className="border px-4 py-2 font-semibold"
+                                style={{ backgroundColor: jsonData.Domain_Data["Community"][key] }}
+                                >{key}</td>
+                                <td className="border px-4 py-2"  >
+                                    {String(value)}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </>
         );
     }

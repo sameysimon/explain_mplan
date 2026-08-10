@@ -79,6 +79,32 @@ export default function App() {
     useEffect(() => {
         const h = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
         setMDPFileHistory(h);  
+        document.addEventListener('keydown',(e) => {
+            const targetTag = (e.target?.tagName || '').toLowerCase();
+            if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') {
+                return;
+            }
+
+            switch (e.key.toLowerCase()) {
+                case "d":
+                    e.preventDefault();
+                    setUserType("Domain designer");
+                    break;
+                case "a":
+                    e.preventDefault();
+                    setUserType("Algorithm designer");
+                    break;
+                case "e":
+                case "u":
+                    e.preventDefault();
+                    setUserType("User");
+                    break;
+                case "r":
+                    removeHighlights(tree,setTree,setHighlights)
+                    break;
+            }
+
+        })
     }, [])
     // Update highlights
     useEffect(()=> {
@@ -126,45 +152,19 @@ export default function App() {
         setJsonData(newJSON);
         setExplanations([...explanations, x]);
     };
-    const fetchHistories = async (policyIdList) => {
-        let piIds = policyIdList.filter((piId) => {
-            return !jsonData.Histories[piId] 
-        });
-        if (piIds.length===0) {
-            return;
-        }
-        let newJSON=""
-        try {
-            const request = {policy_ids: piIds};
-            console.log("req",request);
-            const response = await fetch('http://localhost:18080/Histories', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(request)
-            });
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-            const data = await response.json();
-            newJSON = JSON.parse(JSON.stringify(jsonData));
-            for (const [piID,histories] of Object.entries(data)) {
-                newJSON.Histories[piID] = histories;
-            }
-        } catch (err) {
-            console.error("Couldn't fetch histories for policies", piIds, err);
-            return;
-        }
-        setJsonData(newJSON);
-        return;
-    }
+
+
+    
 
 
     return <>
         <label htmlFor="fileIn">1. Send a json file with a MMMDP/SSP to the Server: </label>
         <input list="mdpSuggestions" name="fileIn" id="fileIn" width="50" style={{"width": "400pt"}} /> 
-        <button onClick={ queryMMMDP }>Submit</button><br/>
+        <button onClick={ queryMMMDP }>Submit</button>
+
+        <label htmlFor="setPort"> Also set the port of the MMMDP/SSP Server: </label>
+        <input type="number" id="setPort" defaultValue={18080} />
+        <button onClick={() => {setPort(document.getElementById("setPort").value)} }>Update</button><br/>
 
         <label htmlFor="fileInput">2. Load a json solution file: </label>
         <input type="file" id="fileinput" onChange={event_loadJSONFile} />
@@ -188,9 +188,9 @@ export default function App() {
         <label htmlFor="userType">
             You are {userType.match("^[aieouAIEOU].*") ? "an " : "a " }
         </label>
-        <select id="userType" name="userType" onChange={(e)=>{setUserType(e.target.value);}}>
-            <option default value="Algorithm designer">Algorithm designer</option>
-            <option default value="Domain designer">Domain designer</option>
+        <select id="userType" name="userType" value={userType} onChange={(e)=>{setUserType(e.target.value);}}>
+            <option value="Algorithm designer">Algorithm designer</option>
+            <option value="Domain designer">Domain designer</option>
             <option value="User">End user</option>
         </select>
         <br/>
@@ -201,21 +201,20 @@ export default function App() {
                     noClose x="0" y={window.innerHeight * 0.05} title="Graph Viewer"
                      width={window.innerWidth * 0.8} height={window.innerHeight * 0.8}
                      className={"myStopScroll"}>
-                <Canvas
-                    tree={tree}
-                    treeDepth={parseInt(jsonData.Horizon * 2 + 1) || 10}
-                    nodeClicked={nodeClicked}
-                    edgeClicked={edgeClicked}
-                    scrColors={conScrData}
-                />
+                    <Canvas
+                        tree={tree}
+                        treeDepth={parseInt(jsonData.Horizon * 2 + 1) || 10}
+                        nodeClicked={nodeClicked}
+                        edgeClicked={edgeClicked}
+                        scrColors={conScrData}
+                    />
                 </WinBox>
-                <Summary setPolicy={setPolicy} width={window.innerWidth * 0.5} height={window.innerHeight * 0.5} />
+                <Summary setPolicy={setPolicy} />
                 <Inspector node={node} edge={edge} minimised={edge=="none" && node=="none"} expHandler={newExplanation} setPolicy={setPolicy} />
                 {explanations.map((exp, i) => (
                     <ExplainMEHR
                         key={"exp" + i}
                         expInfo={exp}
-                        fetchHistories={fetchHistories}
                     />
                 ))}
              </>
