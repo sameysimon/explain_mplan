@@ -10,6 +10,10 @@ type DetailsProps = {
     horizon: number;
     setHorizon:  React.Dispatch<React.SetStateAction<number>>;
     maxHorizon: number;
+    showEdgeLabels: boolean;
+    setShowEdgeLabels: React.Dispatch<React.SetStateAction<boolean>>;
+    scaleNodes: boolean;
+    setScaleNodes: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function FileDetails(props:DetailsProps) {
@@ -90,6 +94,21 @@ export default function FileDetails(props:DetailsProps) {
 
             <label htmlFor="maxHeight">Max Horizon (0 to {props.maxHorizon}):</label>
             <input name="maxHeight" type="number" min="0" max={props.maxHorizon.toString()} onChange={auxHorizon} value={horizon} />
+            <div/>
+            <label htmlFor="showEdgeLabels">Show Edge Labels:</label>
+            <input
+                name="showEdgeLabels"
+                type="checkbox"
+                checked={props.showEdgeLabels}
+                onChange={(e) => props.setShowEdgeLabels(e.target.checked)}
+            />
+            <label htmlFor="scaleNodes">Scale Nodes:</label>
+            <input
+                name="scaleNodes"
+                type="checkbox"
+                checked={props.scaleNodes}
+                onChange={(e) => props.setScaleNodes(e.target.checked)}
+            />
         </div>
         </WinBox>
         </>

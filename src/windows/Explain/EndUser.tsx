@@ -30,13 +30,12 @@ export default function EndUserJustify(props:JustifyProps) {
         <div className="chat">
             <div className="chat_bubble_container incoming">
                 <div className="chat_bubble">
-                    The system should do policy <RenderPolicy id={props.attack.TargetPolicyIdx} />.
+                    Policy <RenderPolicy id={props.attack.TargetPolicyIdx} /> is correct.
                 </div>
             </div>
             <div className="chat_bubble_container outgoing">
                 <div className="chat_bubble">
-                    No, that policy has a {<RoundProb value={target_history_pr}/>} probability of trajectory {<RenderHistory policyIdx={props.attack.TargetPolicyIdx} historyIdx={props.attack.TargetHistoryIdx} />}, 
-                    worth <RenderWorth worth={target_history_Worth} considerations={props.considerations} />, considered by moral theory '{props.theory}''.
+                    No, one outcome of the policy is worth <RenderWorth worth={target_history_Worth} considerations={props.considerations} /> by moral theory {props.theory}.
                     {props.theoryType==='Fairness' &&
                         <> The theory judges the variance between entities of {} unfair.</>
                     }
@@ -47,14 +46,12 @@ export default function EndUserJustify(props:JustifyProps) {
             </div>
             <div className="chat_bubble_container incoming">
                 <div className="chat_bubble">
-                    This may be the most preferable trajectory by moral theory '{props.theory}'.
+                    That's right. After the policy, that outcome will be considered acceptable.
                 </div>
             </div>
             <div className="chat_bubble_container outgoing">
                 <div className="chat_bubble">
-                    No, from the perspective of that trajectory end-point, there would be negative retrospection for missing policy <RenderPolicy id={props.attack.SourcePolicyIdx} />.
-                    That policy has a <RoundProb value={source_history_pr}/> probability of 
-                    trajectory <RenderHistory policyIdx={props.attack.SourcePolicyIdx} historyIdx={props.attack.TargetHistoryIdx} /> worth <RenderWorth worth={source_history_Worth} considerations={props.considerations}/> by '{props.theory}'.
+                    No, it will not. The policy misses the outcome from policy <RenderPolicy id={props.attack.SourcePolicyIdx} />, worth <RenderWorth worth={source_history_Worth} considerations={props.considerations}/> which is preferred by {props.theory}.
                     {props.theoryType==='Fairness' &&
                         <> The variance between entities in that trajectory is {variance(source_history_Worth)} which is more fair.</>
                     }
@@ -65,14 +62,14 @@ export default function EndUserJustify(props:JustifyProps) {
             </div>
             <div className="chat_bubble_container incoming">
                 <div className="chat_bubble">
-                    That trajectory may well be preferable, but was this foreseeable? Perhaps other trajectories would make <RenderPolicy id={props.attack.TargetPolicyIdx} /> preferable at decision-time.
+                    That outcome may well be preferable, but is this foreseeable?
                 </div>
             </div>
             <div className="chat_bubble_container outgoing">
                 <div className="chat_bubble">
                     {((props.theoryType !=='Fairness') && (props.theoryType !== 'Maximin')) &&
                         <>
-                            No, at decision-time <RenderPolicy id={props.attack.SourcePolicyIdx} /> expected <RenderWorth worth={source_policy_Worth} considerations={props.considerations}/> which is 
+                            Yes, at decision-time <RenderPolicy id={props.attack.SourcePolicyIdx} /> expected <RenderWorth worth={source_policy_Worth} considerations={props.considerations}/> which is 
                             preferable to <RenderWorth worth={target_policy_Worth} considerations={props.considerations}/> expected by policy <RenderPolicy id={props.attack.TargetPolicyIdx} />.
                         </>
                     }

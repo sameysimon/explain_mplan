@@ -115,5 +115,6 @@ export const highlightFn = (hlt, highlights, tree:TreeNode, setTree, setHighligh
     }
     newHighlights = newHighlights.filter(hlt => hlt.value===true);
     setHighlights(newHighlights);
+    console.log("Set highlights; set tree.")
     setTree(tree_);
 }

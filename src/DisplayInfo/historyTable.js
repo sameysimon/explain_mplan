@@ -20,6 +20,7 @@ export function HistoryTable(props) {
     }
     let p = 1;
     let prevState = 0;
+    let total_p = 1;
     return <table className={"myTable"}>
         <thead>
             <tr>
@@ -31,9 +32,10 @@ export function HistoryTable(props) {
         </thead>
         <tbody>
             {transitions.map((v,i) => {
+                total_p *= v[0];
                 let r = <tr key={`tranTab_tr${i}`}>
                     <th key={`tranTab_tr${i}_src`}> {prevState} </th>
-                    <th key={`tranTab_tr${i}_prob`}><RoundProb value={p = p * v[0]}/> </th>
+                    <th key={`tranTab_tr${i}_prob`}><RoundProb value={p = v[0]}/> </th>
                     <th key={`tranTab_tr${i}_scr`}>{v[1]}</th>
                     <th key={`tranTab_tr${i}_worth`}>
                         <RenderWorth worth={v.slice(2)}/>
@@ -44,7 +46,7 @@ export function HistoryTable(props) {
             })}
             <tr>
                 <th>Total</th>
-                <th></th>
+                <th>{total_p}</th>
                 <th>Total</th>
                 <th><RenderWorth worth={jsonData.Histories[props.policyIdx][props.historyIdx].Worth}/> </th>
             </tr>

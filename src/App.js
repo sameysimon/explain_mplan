@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import WinBox from 'react-winbox';
 import 'katex/dist/katex.min.css';
@@ -18,13 +18,13 @@ const HISTORY_KEY = "ExplainMEHR";
 const MDP_SUGGESTIONS = 10;
 
 export default function App() {
-    const { port, setPort } = useSettings();
-    const { userType, setUserType } = useSettings();
     const { jsonData, setJsonData, currentPolicyIdx, setCurrentPolicyIdx,
             counterPoliciesIdx, setCounterPoliciesIdx,
             highlights, setHighlights, setHighlightFn,
             tree, setTree, conScrData, setConScrData, currConsIdx, setCurrConsIdx,
-            addCounterPolicy, setConsiderationView } = useSettings();
+            addCounterPolicy, userType, setUserType, port, setPort } = useSettings();
+
+    const previousCurrConsIdx = useRef(currConsIdx);
 
     const [mdpFileHistory, setMDPFileHistory] = useState([]);
     const [explanations, setExplanations] = useState([]);
@@ -106,11 +106,21 @@ export default function App() {
 
         })
     }, [])
+
+    useEffect(() => {
+        if (previousCurrConsIdx.current === currConsIdx) {
+            return;
+        }
+        previousCurrConsIdx.current = currConsIdx;
+
+        let x = buildTree(jsonData,currentPolicyIdx,counterPoliciesIdx,currConsIdx);
+        setTree(x);
+    }, [currConsIdx]);
     // Update highlights
     useEffect(()=> {
         const x = (hlt) => highlightFn(hlt,highlights,tree,setTree,setHighlights,jsonData);
         setHighlightFn(() => x);
-    }, [highlights,tree,setTree,setHighlights,jsonData])
+    }, [highlights,jsonData])
     
     // 
     // EVENT HANDLERS

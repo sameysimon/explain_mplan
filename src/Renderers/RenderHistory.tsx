@@ -59,7 +59,7 @@ export default function RenderHistory(props:{policyIdx:number, historyIdx:number
         onContextMenu={rightClick}
         
         >
-            <InlineMath math={`h^{\\pi_{${props.policyIdx}}}_{${props.historyIdx}}`} />
+            <InlineMath math={`\\tau^{\\pi_{${props.policyIdx}}}_{${props.historyIdx}}`} />
     <div className="tooltiptext">
         <RenderWorth worth={jsonData.Histories[props.policyIdx][props.historyIdx].Worth} noToolTip={true} />
     </div>

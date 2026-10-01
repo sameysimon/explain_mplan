@@ -239,6 +239,7 @@ export function ActionInfo(props: ActionInfoProps) {
             <p>Either select one or right click to it as a counter policy.</p>
             <p>
                 The current policy <RenderPolicy id={currentPolicyIdx} /> expects moral worth <RenderWorth worth={jsonData.Solutions[currentPolicyIdx].Expectation} />
+                {jsonData.Non_Moral!==-1 && ` The non-moral budget is ${jsonData.Considerations[jsonData.Non_Moral].Budget}.`}
             </p>
             <table className="myTable">
             <thead><tr>
@@ -253,10 +254,15 @@ export function ActionInfo(props: ActionInfoProps) {
                     const budget = jsonData.Non_Moral!==-1 ? jsonData.Considerations[jsonData.Non_Moral].Budget : undefined;
                     return <tr>
                     <td key={`necc_pols_pi_${i}`}> <RenderPolicy id={pi_idx} html_key={`necc_pols_rpi_${i}`} /> </td>
-                    <td key={`necc_pols_w_${i}`}> <RenderWorth worth={jsonData.Solutions[pi_idx].Expectation} key={`necc_pols_rw_${i}`} /> </td>
+                    <td key={`necc_pols_w_${i}`}> 
+                        <RenderWorth
+                            worth={jsonData.Solutions[pi_idx].Expectation}
+                            key={`necc_pols_rw_${i}`} 
+                        /> 
+                    </td>
                     {budget &&
                        <td key={`necc_pols_b_${i}`}>
-                        {parseFloat(jsonData.Solutions[pi_idx].Expectation[jsonData.Non_Moral]) < (budget*-1)
+                        {parseFloat(jsonData.Solutions[pi_idx].Expectation['Cost']) < (budget*-1)
                                 ? "true" : "false"}
                        </td>
                     }

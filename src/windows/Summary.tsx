@@ -9,12 +9,6 @@ import PolicyHistories from './ShowHistories.tsx';
 import { RoundProb } from '../DisplayInfo/RenderProbability.js';
 
 export default function Summary(props:{ setPolicy:(a:number)=>void}) {
-    const [box, setBox] = useState({
-        x: "center" as string | number,
-        y: 30 as string | number,
-        width: window.innerWidth * 0.5,
-        height: 'fit-content',
-    });
     const { jsonData, setJsonData, userType } = useSettings();
     const [ showHistories, setShowHistories ] = useState(-1);
 

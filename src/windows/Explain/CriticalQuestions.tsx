@@ -92,23 +92,22 @@ export function CriticalQuestions(props: CriticalQuestionsProps) {
 
         function DomainCQ() {
             return <>
-                <h2>Policy-history compare</h2>
+                <h2>Policy-Trajectory compare</h2>
                 <ArgumentAttack attack={props.attack} />
-                <div style={{display: "flow-root", width:"fit-content"}}>
+                <div style={{display: "flex", width:"100%", flexDirection: "column", placeContent:'center'}}>
                 <div style={{"float":"left"}}>
-                    <p>Source History <RenderHistory policyIdx={attack.SourcePolicyIdx} historyIdx={attack.SourceHistoryIdx}/></p>
+                    <p>Source Trajectory <RenderHistory policyIdx={attack.SourcePolicyIdx} historyIdx={attack.SourceHistoryIdx}/></p>
                     <HistoryTable policyIdx={attack.SourcePolicyIdx} historyIdx={attack.SourceHistoryIdx}/>
                 </div>
                 <div style={{"float":"right"}}>
-                    <p>Target History <RenderHistory policyIdx={attack.TargetPolicyIdx} historyIdx={attack.TargetHistoryIdx}/></p>
+                    <p>Target Trajectory <RenderHistory policyIdx={attack.TargetPolicyIdx} historyIdx={attack.TargetHistoryIdx}/></p>
                     <HistoryTable policyIdx={attack.TargetPolicyIdx} historyIdx={attack.TargetHistoryIdx}/>
                 </div>
                 </div>
                 <br/>
                 <p>
-                To reduce computation and simplify explanatory information, policy trajectories with equivalent moral worth across all moral considerations are grouped and represented as a single history.
-                The tables above show a single trajectory from each history.
-                Hovering over the symbol for each history marks all its equivalent trajectories in the GraphViewer in red.
+                Policy trajectories with equivalent moral worth are represented as a single trajectory.
+                The above show one potential trajectory.
                 </p>
             </>
         }

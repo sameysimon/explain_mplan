@@ -25,15 +25,15 @@ export default function AlgorithmJustify(props:JustifyProps) {
     return <>
         <h2>Critical Questions</h2> 
         <p>Argument Attack:</p>
-        <InlineMath math={`(${props.theory}^{\\pi_{${props.attack.SourcePolicyIdx}}}_{h_${props.attack.SourceHistoryIdx}}) \\rightarrow (${props.theory}^{\\pi_{${props.attack.TargetPolicyIdx}}}_{h_${props.attack.TargetHistoryIdx}})`} />
+        <InlineMath math={`(${props.theory}^{\\pi_{${props.attack.SourcePolicyIdx}}}_{\\tau_${props.attack.SourceHistoryIdx}}) \\rightarrow (${props.theory}^{\\pi_{${props.attack.TargetPolicyIdx}}}_{\\tau_${props.attack.TargetHistoryIdx}})`} />
         <p>For {props.theory}, attacks are defined by two Critical Questions:</p>
         <p><b>CQ1:</b> Does the target trajectory violate a moral principle where source does not?</p> 
             
-            Yes.
+            Yes:
             {props.theoryType !== 'Maximin' && props.theory !== 'Fairness' &&
                 
                 <div className='hCentre'>
-                    <InlineMath math={`W^{h_{${props.attack.SourceHistoryIdx}}}[0](s_0) \\succ W^{h_{${props.attack.TargetHistoryIdx}}}[0](s_0)`} 
+                    <InlineMath math={`W^{\\tau_{${props.attack.SourceHistoryIdx}}}[0](s_0) \\succ W^{\\tau_{${props.attack.TargetHistoryIdx}}}[0](s_0)`} 
                      />
                     <br/>
                     <RenderWorth worth={source_history_Worth} considerations={props.considerations}/>
@@ -50,9 +50,9 @@ export default function AlgorithmJustify(props:JustifyProps) {
             }
             {props.theory === 'Maximin' &&
                 <div className='hCentre'>
-                    <InlineMath math={`CQ1_{${props.theory} = \\min_{c_i \\in C^{${props.theory}}}} \\vec{W}^{h_{${props.attack.SourceHistoryIdx}}_{i}[0](s_0)
+                    <InlineMath math={`CQ1_{${props.theory} = \\min_{c_i \\in C^{${props.theory}}}} \\vec{W}^{\\tau_{${props.attack.SourceHistoryIdx}}_{i}[0](s_0)
                         >
-                        \\min_{c_i \\in C^{${props.theory}}}} \\vec{W}^{h'_{${props.attack.TargetHistoryIdx}}_{i}[0](s_0)`} 
+                        \\min_{c_i \\in C^{${props.theory}}}} \\vec{W}^{\\tau'_{${props.attack.TargetHistoryIdx}}_{i}[0](s_0)`} 
                      />
                     <br/>
                     <InlineMath math={`CQ1_{${props.theory} = \\min`} /> 
@@ -83,7 +83,7 @@ export default function AlgorithmJustify(props:JustifyProps) {
                 </div>
             }
         <p><b>CQ2:</b> Is there greater foresight or expectation that the target policy will violate the moral principle more than the source?</p>
-        Yes.
+        Yes:
     
         <div className='hCentre'>
             {props.theory === 'Maximin' &&
@@ -93,9 +93,9 @@ export default function AlgorithmJustify(props:JustifyProps) {
                 />
             }
             {props.theory !== 'Maximin' &&
-                <InlineMath math={`CQ2_{${props.theory}} = \\mathcal{Q}^{\\pi_{${props.attack.SourcePolicyIdx}}}_{${props.theory}}(s_0, \\pi_{${props.attack.SourcePolicyIdx}}(s_0, 0))
-                    \\succ_{${props.theory}} 
-                    \\mathcal{Q}^{\\pi_{${props.attack.TargetPolicyIdx}}}_{${props.theory}}(s_0, \\pi_{${props.attack.TargetPolicyIdx}}(s_0, 0))`} 
+                <InlineMath math={`CQ2 = \\mathcal{Q}^{\\pi_{${props.attack.SourcePolicyIdx}}}(s_0, \\pi_{${props.attack.SourcePolicyIdx}}(s_0, 0))
+                    \\succ
+                    \\mathcal{Q}^{\\pi_{${props.attack.TargetPolicyIdx}}}(s_0, \\pi_{${props.attack.TargetPolicyIdx}}(s_0, 0))`} 
                 />
             }
             <br/>
@@ -115,7 +115,7 @@ export default function AlgorithmJustify(props:JustifyProps) {
         </div>
         
 
-        <p>Thus, by moral theory {props.theory}, there is negative retrospection on trajectory <InlineMath math={`h_{${props.attack.TargetHistoryIdx}}`}/> for selecting policy <InlineMath math={`\\pi_{${props.attack.TargetPolicyIdx}}`}/>,
-        because of trajectory <InlineMath math={`h_{${props.attack.SourceHistoryIdx}}`}/> by policy <InlineMath math={`\\pi_{${props.attack.TargetPolicyIdx}}`}/>.</p>
+        <p>Thus, by moral theory {props.theory}, there is negative retrospection on trajectory <InlineMath math={`\\tau_{${props.attack.TargetHistoryIdx}}`}/> for selecting policy <InlineMath math={`\\pi_{${props.attack.TargetPolicyIdx}}`}/>,
+        because of trajectory <InlineMath math={`\\tau_{${props.attack.SourceHistoryIdx}}`}/> by policy <InlineMath math={`\\pi_{${props.attack.TargetPolicyIdx}}`}/>.</p>
         </>
 }

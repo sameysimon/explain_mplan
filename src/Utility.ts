@@ -99,7 +99,7 @@ export interface TreeNode {
     label?: string;
     policyAction?: boolean;
     highlight?: boolean;
-    edgeLabel?: number;
+    edgeLabel?: string;
     counterAction?:boolean;
 }
 
@@ -108,7 +108,7 @@ const buildPathKey = (parentKey: string | undefined, type: TreeNode['type'], id:
     return `${base}/${type}:${String(id)}:${String(label ?? "")}`;
 };
 
-export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[]) => {
+export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[], currConsiderationIdx?:number) => {
     var tree:TreeNode = {
         id: 0,
         pathKey: buildPathKey(undefined, 'state', 0, '0'),
@@ -124,11 +124,15 @@ export const buildTree = (json:JsonData, piIdx:number, counter_policies?:number[
     if (!counter_policies) {
         counter_policies = [];
     }
-    makeTree(tree, true, json, piIdx, counter_policies);
+    if (currConsiderationIdx!== 0 && !currConsiderationIdx) {
+        console.log("here")
+        currConsiderationIdx = -1;
+    }
+    makeTree(tree, true, json, piIdx, counter_policies, currConsiderationIdx);
     return tree;
 };
 
-export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:number, counterPiIdxs:number[]) => {
+export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:number, counterPiIdxs:number[], currConsiderationIdx:number) => {
     if (node.type === 'state') {
         const transitions = json.State_transitions as Record<string, Record<string, number[][]>>;
         let policyAction = getAction(piIdx, node.id as number, json);
@@ -150,20 +154,25 @@ export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:
                 highlight: false,
                 children: []
             };
-            makeTree(a, showState && (policyAction.includes(actionStr) || counterActions.includes(actionStr)), json, piIdx, counterPiIdxs);
+            makeTree(a, showState && (policyAction.includes(actionStr) || counterActions.includes(actionStr)), json, piIdx, counterPiIdxs, currConsiderationIdx);
             node.children.push(a);
         }
     } else if (node.type === 'action') {
         const transitions = json.State_transitions as Record<string, Record<string, number[][]>>;
         let successors = transitions[String(node.source_state)][String(node.label)];
         for (const scr of successors) {
+            console.log("curr con idx", currConsiderationIdx);
+            let edgeLabel_ = String(Math.round(scr[0] * 1_000) / 1_000);
+            if (currConsiderationIdx!==-1) {
+                edgeLabel_ = String(scr[2+currConsiderationIdx]);
+            }
             var s: TreeNode = {
                 id: scr[1],
                 pathKey: buildPathKey(node.pathKey, 'state', scr[1], String(scr[1])),
                 type: 'state',
                 isGoal: json.Goals ? json.Goals.includes(scr[1]) : false,
                 label: String(scr[1]),
-                edgeLabel: Math.round(scr[0] * 1_000) / 1_000,
+                edgeLabel: edgeLabel_,
                 info : json.State_tags ? json.State_tags[scr[1]] : "",
                 show: showState,
                 selected: false,
@@ -171,7 +180,7 @@ export const makeTree = (node:TreeNode, showState:boolean, json:JsonData, piIdx:
                 source_state: node.source_state,
                 children: []
             };
-            makeTree(s, showState, json, piIdx, counterPiIdxs);
+            makeTree(s, showState, json, piIdx, counterPiIdxs, currConsiderationIdx);
             node.children.push(s);
         }
     }

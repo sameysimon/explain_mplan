@@ -22,17 +22,25 @@ const SetEdgeLabels = (d: { target: { data: { edgeLabel: any; }; }; }) => {
 };
 
 export default function Canvas(props : CanvasProps) {
+    //
+    // State
+    //
+    const { currentPolicyIdx } = useSettings();
     const ref = useRef<SVGSVGElement | null>(null);
+
     const [spacing, setSpacing] = useState<[number,number]>([1,1]);
     const [node, setNode] = useState<CanvasNode | null>(null);
     const [horizon, setHorizon] = useState<number>(props.treeDepth);
-    const { currentPolicyIdx } = useSettings();
-
+    const [showEdgeLabels, setShowEdgeLabels] = useState<boolean>(true);
+    const [scaleNodes, setScaleNodes] = useState<boolean>(true);
     // Tooltip State
     const [hoveredNode, setHoveredNode] = useState<CanvasNode | null>(null);
     const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+
+    //
     // Node Event handlers
+    //
     const nodeClicked = (e:MouseEvent, d:CanvasNode) => {
         setNode(d);
         props.nodeClicked(e,d);        
@@ -140,25 +148,38 @@ export default function Canvas(props : CanvasProps) {
             .attr("x2", (d: { target: { x: number; }; }) => d.target.x * spacing[0])
             .attr("y2", (d: { target: { y: number; }; }) => d.target.y * spacing[1])
             .on('click', (e: MouseEvent,d: any) => edgeClicked(e,d))
-            .attr('style', function(d: { source: { data: { source_state: string | number; highlight: any; id: any; }; }; target: { data: { id: string | number; highlight: any; }; }; }) {
+            .attr('style', function(d: { source: { data: { source_state: string | number; highlight: any; id: any; }; }; target: { data: { id: string | number; highlight: any; edgeLabel:any; }; }; }) {
                 const x = props.scrColors?.[d.source.data.source_state]?.[d.target.data.id]?.norm;
                 let col = "black";
-                let str = "2px";
+                let str_width = 2;
+                
                 if (d.source.data.highlight && d.target.data.highlight) {
                     col = "#C27AFF";
-                    str = "6px";
+                    str_width *=3 ;
                 }
                 else if (x!= null) {
                     col = `hsl(${120 * (1-x)}, 80%, 45%)`;
-                    str = "5px";
+                    str_width*=2;
                 }
-                
                 else if (node && (d.source.data.id === node.data.id || d.target.data.id === node.data.id)) {
                     col = "cyan";
-                    str = "5px";
-                } 
+                    str_width*=2;
+                }
                 
-                return `stroke : ${col}; stroke-width: ${str};`;
+                const dashLength = d3.scaleLinear()
+                    .domain([0, 1])
+                    .range([1, 12])
+                    .clamp(true);
+                
+                let rule = `stroke : ${col}; `;
+                rule += `stroke-width: ${str_width}px; `
+                if (typeof d.target.data.edgeLabel === 'number') {
+                    let period = 12;
+                    const p = Math.max(0, Math.min(1, d.target.data.edgeLabel));
+                    rule += `stroke-dasharray: ${p * period} ${(1 - p) * period};`;
+                    rule += `stroke-linecap: round`;
+                }
+                return rule;
             });
         links.exit().remove();// Remove old links
             
@@ -181,7 +202,7 @@ export default function Canvas(props : CanvasProps) {
             .attr("fill", "white")
             .attr("x", (d: { source: { x: any; }; target: { x: any; }; }) => ((d.source.x + d.target.x) / 2) * spacing[0])
             .attr("y", (d: { source: { y: any; }; target: { y: any; }; }) => ((d.source.y + d.target.y) / 2) * spacing[1])
-            .text(SetEdgeLabels);
+            .text(showEdgeLabels ? SetEdgeLabels : () => "");
 
         edgeLabels.exit()
             .remove();
@@ -261,7 +282,7 @@ export default function Canvas(props : CanvasProps) {
         zoomGroup.selectAll(".node").filter((d: any) => !d?.data?.highlight).raise();
         zoomGroup.selectAll(".node").filter((d: any) => d?.data?.highlight).raise();
 
-    }, [horizon, node, props.tree, spacing, props.scrColors]);
+    }, [horizon, node, props.tree, spacing, props.scrColors, showEdgeLabels]);
 
     useEffect(() => {
         const zoomGroup = d3.select(ref.current).select(".zoomGroup");
@@ -270,7 +291,6 @@ export default function Canvas(props : CanvasProps) {
             return;
         }
         zoomGroup.selectAll(".link")
-            
     });
 
     return (
@@ -315,6 +335,10 @@ export default function Canvas(props : CanvasProps) {
                 setSpacing={setSpacing}
                 horizon={horizon}
                 setHorizon={setHorizon}
+                showEdgeLabels={showEdgeLabels}
+                setShowEdgeLabels={setShowEdgeLabels}
+                scaleNodes={scaleNodes}
+                setScaleNodes={setScaleNodes}
                 maxHorizon={props.treeDepth}
             />
         </>
